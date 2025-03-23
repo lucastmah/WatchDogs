@@ -1,9 +1,10 @@
 {
-	"name": "beatbox-server",
+	"name": "cctv-server",
 	"version": "0.0.1",
-	"description": "A simple drum-machine through the BBB and Zen cape.",
+	"description": "Simple website for display video feed from BeagleY-AI connected webcam.",
 	"dependencies": {
 		"socket.io": "~2.5",
-		"mime": "~1.6"
+		"mime": "~1.6",
+		"express": "~4.21.2"
 	}
 }

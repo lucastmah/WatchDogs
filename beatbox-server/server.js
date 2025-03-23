@@ -1,74 +1,32 @@
 "use strict";
+// source from gabrieltanner.org/blog/webrtc-video-broadcast/
 
-// Server for HTTP and loading other server modules
-// Install modules:
-//   $ npm install
-//
-// Launch server with:
-//   $ node server.js
-// 
+const PORT_NUMBER = 8088;
 
-var PORT_NUMBER = 8088;
+const path = require("path");
+const express = require("express");
+const app = express();
 
-var http = require('http');
-var fs   = require('fs');
-var path = require('path');
-var mime = require('mime');
+const http = require("http");
+const server = http.createServer(app);
 
+const io = require("socket.io")(server);
 
-/* 
- * Create the static web server
- */
-var server = http.createServer(function(request, response) {
-	var filePath = false;
-	
-	if (request.url == '/') {
-		filePath = 'public/index.html';
-	} else {
-		filePath = 'public' + request.url;
-	}
-	
-	var absPath = './' + filePath;
-	serveStatic(response, absPath);
+app.get('/', (req, res) => {
+	res.sendFile(path.join(__dirname, '/public/index.html'));
 });
 
-server.listen(PORT_NUMBER, function() {
-	console.log("Server listening on port " + PORT_NUMBER);
+app.get('/cctv_ui.js', (req, res) => {
+	res.sendFile(path.join(__dirname, '/public/cctv_ui.js'));
 });
 
-function serveStatic(response, absPath) {
-	fs.exists(absPath, function(exists) {
-		if (exists) {
-			fs.readFile(absPath, function(err, data) {
-				if (err) {
-					send404(response);
-				} else {
-					sendFile(response, absPath, data);
-				}
-			});
-		} else {
-			send404(response);
-		}
-	});
-}
+setInterval(() => {
+	// https://youtu.be/qexy4Ph66JE?si=jz2TREgDjcaS2TSF for am image version
+	// tsh.io/blog/how-to-write-video-chat-app-using-webrtc-and-nodejs/ for video version
+	io.emit('image', 'some data');
+}, 1000);
 
-function send404(response) {
-	response.writeHead(404, {'Content-Type': 'text/plain'});
-	response.write('Error 404: resource not found.');
-	response.end();
-}
+server.listen(PORT_NUMBER);
 
-function sendFile(response, filePath, fileContents) {
-	response.writeHead(
-			200,
-			{"content-type": mime.lookup(path.basename(filePath))}
-		);
-	response.end(fileContents);
-}
-
-
-/*
- * Create the beatbox server to listen for the websocket
- */
-var procServer = require('./lib/beatbox_server');
+var procServer = require('./lib/cctv_server');
 procServer.listen(server);

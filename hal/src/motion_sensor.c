@@ -60,13 +60,10 @@ static _Atomic bool motion_detected = false;
 
 static void (*subscribers[MAX_SUBSCRIBERS]) (bool motion_state);
 static int sub_count = 0;
-static pthread_mutex_t sub_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void motionSensor_addSubscriber(void (*callback)(bool motion_state)) {
     if (sub_count < MAX_SUBSCRIBERS) {
-        pthread_mutex_lock(&sub_mutex);
         subscribers[sub_count] = callback;
-        pthread_mutex_unlock(&sub_mutex);
         sub_count++;
     }
 }
@@ -80,9 +77,7 @@ void motionSensor_processState(int chip, int pin, bool is_rising) {
             motion_detected = false;
         }
         for (int i = 0; i < sub_count; i++) {
-            pthread_mutex_lock(&sub_mutex);
             subscribers[i](motion_detected);
-            pthread_mutex_unlock(&sub_mutex);
         }
     }
 }

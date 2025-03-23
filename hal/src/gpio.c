@@ -1,5 +1,4 @@
 #include "hal/gpio.h"
-#include "hal/motion_sensor.h"
 #include <gpiod.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -33,13 +32,6 @@ static char* s_chipNames[] = {
     "gpiochip2",
 };
 
-// = {
-//     // {GPIO_CHIP_2, 7},
-//     // {GPIO_CHIP_2, 8},
-//     // {GPIO_CHIP_0, 10},
-//     // {GPIO_CHIP_2, 15},
-//     {GPIO_CHIP_1, 38, motionSensor_processState},
-// }
 static struct gpiolines gpio_lines[MAX_GPIO_LINES];
 struct gpiod_line* lines[MAX_GPIO_LINES];
 static int gpio_lines_count = 0;
@@ -79,7 +71,7 @@ static void* gpio_loop(void* args) {
             }
             
             bool isRising = event.event_type == GPIOD_LINE_EVENT_RISING_EDGE;
-            for (int j = 0; j < GPIO_NUM_LINES; j++) {
+            for (int j = 0; j < gpio_lines_count; j++) {
                 if (chipNum == gpio_lines[j].chip && this_line_number == gpio_lines[j].pin) {
                     gpio_lines[j].action(chipNum, this_line_number, isRising);
                 }
@@ -130,7 +122,7 @@ void Gpio_initialize(void)
     }
 
     // Add lines to corresponding bulkWait to GPIO Chip
-    for (int i = 0; i < GPIO_NUM_LINES; i++) {
+    for (int i = 0; i < gpio_lines_count; i++) {
         lines[i] = Gpio_openForEvents(gpio_lines[i].chip, gpio_lines[i].pin);
         gpiod_line_bulk_add(&bulkWait[gpio_lines[i].chip], lines[i]);
     }
