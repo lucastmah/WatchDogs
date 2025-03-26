@@ -1,3 +1,4 @@
+#include "hal/motion_sensor.h"
 #include <stdio.h>
 #include <pthread.h>
 #include <assert.h>
@@ -5,7 +6,6 @@
 #include "hal/gpio.h"
 #include "hal/led.h"
 
-#define SENSOR_PIN 38
 #define MAX_SUBSCRIBERS 5
 
 // static pthread_t thread_id;
@@ -69,7 +69,7 @@ void motionSensor_addSubscriber(void (*callback)(bool motion_state)) {
 }
 
 void motionSensor_processState(int chip, int pin, bool is_rising) {
-    if (chip == GPIO_CHIP_1 && pin == SENSOR_PIN) {
+    if (chip == SENSOR_CHIP && pin == SENSOR_PIN) {
         if (is_rising) {
             motion_detected = true;
         }

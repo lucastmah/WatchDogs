@@ -3,6 +3,9 @@
 
 #include <stdbool.h>
 
+#define SENSOR_CHIP 1
+#define SENSOR_PIN 38
+
 // void motion_sensor_initialize(void);
 
 // void motion_sensor_cleanup(void);
