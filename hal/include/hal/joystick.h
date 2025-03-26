@@ -1,4 +1,13 @@
+/*
+
+HOW TO USE:
+
+Call joystick_getDirection repeatedly to get the current direction.
+
+*/
+
 #ifndef JOYSTICK_H_
+#define JOYSTICK_H_
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -29,6 +38,7 @@ struct joystickState {
     bool isPressed;
 };
 
+// Returns the direction the joystick is currently in
 enum DIRECTION joystick_getDirection(void);
 
 #endif

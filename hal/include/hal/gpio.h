@@ -1,3 +1,16 @@
+/*
+
+HOW TO USE:
+
+GPIO lines of interest need to be added using Gpio_addLineToBulk function.
+Must include the chip, line, and the callback function which takes in an int chip, int line, and bool isRising values.
+
+To begin watching for events, call Gpio_initialize.
+
+To shutdown program, call Gpio_cleanup.
+
+*/
+
 #ifndef _GPIO_H_
 #define _GPIO_H_
 

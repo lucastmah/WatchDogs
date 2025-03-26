@@ -4,7 +4,7 @@
 #include <pthread.h>
 #include "hal/joystick.h"
 #include "hal/led.h"
-#include "hal/motion_sensor.h"
+#include "hal/motionSensor.h"
 #include "hal/gpio.h"
 #include "hal/i2c.h"
 

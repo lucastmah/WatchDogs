@@ -96,7 +96,8 @@ static uint16_t read_i2c_reg16(int i2c_file_desc, uint8_t reg_addr) {
     return value;
 }
 
-uint16_t i2c_getTLAValue(int device) {
+uint16_t i2c_getTLAValue(enum TLA_device device) {
+    assert(is_initialized);
     uint16_t value;
 
     pthread_mutex_lock(&bus_mutex);
@@ -146,6 +147,7 @@ static uint8_t read_i2c_reg8(int i2c_file_desc, uint8_t reg_addr) {
 }
 
 int16_t i2c_getIISValue(int dimension) {
+    assert(is_initialized);
     int16_t value;
 
     pthread_mutex_lock(&bus_mutex);

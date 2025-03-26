@@ -1,3 +1,10 @@
+/*
+
+HOW TO USE:
+
+Call accelerometer_getValues to get the current raw values of acceleration stored in a struct defined in this file.
+
+*/
 #ifndef ACCELEROMETER_H_
 #define ACCELEROMETER_H_
 
