@@ -7,6 +7,7 @@
 #include "hal/motionSensor.h"
 #include "hal/gpio.h"
 #include "hal/i2c.h"
+#include "sendMail.h"
 
 void toggle_LED(bool is_on) {
     led_setBrightness(BYAI_RED, is_on);
@@ -19,6 +20,7 @@ int main() {
     led_initialize();
     i2c_init();
     
+    sendMail_send("lucastmah@gmail.com");
     while(1) {
         i2c_getBH1750Value();
         sleep(1);
