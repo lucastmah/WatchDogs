@@ -8,6 +8,7 @@
 #include "hal/gpio.h"
 #include "hal/i2c.h"
 #include "sendMail.h"
+#include "joystick_controls.h"
 
 void toggle_LED(bool is_on) {
     led_setBrightness(BYAI_RED, is_on);
@@ -19,6 +20,8 @@ int main() {
     Gpio_initialize();
     led_initialize();
     i2c_init();
+    joystick_init();
+    JoystickControls_init();
     
     sendMail_send("lucastmah@gmail.com");
     while(1) {
@@ -26,6 +29,8 @@ int main() {
         sleep(1);
     }
 
+    JoystickControls_cleanup();
+    joystick_cleanup();
     led_cleanup();
     Gpio_cleanup();
 }
