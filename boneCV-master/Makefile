@@ -5,7 +5,7 @@ LFLAGS = -L$(HOME)/cmpt433/public/v4l2_lib_BB -lv4l2
 
 TARGET = capture_exec
 SRC = capture.c
-DEST_DIR = /home/user/cmpt433/public/myApps/
+DEST_DIR = $(HOME)/cmpt433/public/myApps/
 
 all: $(TARGET)
 
