@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include <time.h>
+#include <stdatomic.h>
 
 #define PWM_BASE_FILE_PATH "/dev/hat/pwm/"
 // Servo operates in nano seconds, using 20ms standard
@@ -18,7 +18,7 @@
 // Added to /boot/firmware/extlinux/extlinux.conf:
 // /overlays/k3-am67a-beagley-ai-pwm-epwm0-gpio15.dtbo /overlays/k3-am67a-beagley-ai-pwm-epwm1-gpio6.dtbo
 static char *axis_paths[] = {"GPIO15", "GPIO6"}; 
-static int current_positions[] = {SERVO_DEFAULT_VALUE, SERVO_DEFAULT_VALUE};
+static atomic_int current_positions[] = {SERVO_DEFAULT_VALUE, SERVO_DEFAULT_VALUE};
 
 // Allow module to ensure it has been initialized (once!)
 static bool is_initialized = false;

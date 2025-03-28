@@ -10,27 +10,33 @@
 #include "hal/panTilt.h"
 #include "sendMail.h"
 #include "camera_controls.h"
+#include "udp_server.h"
 
 void toggle_LED(bool is_on) {
     led_setBrightness(BYAI_RED, is_on);
 }
 
+bool stop = false;
+
 int main() {
     motionSensor_addSubscriber(toggle_LED);
     Gpio_addLineToBulk(SENSOR_CHIP, SENSOR_PIN, motionSensor_processState);
+
     Gpio_initialize();
     led_initialize();
     i2c_init();
     joystick_init();
     panTilt_init();
     CameraControls_init();
+    UDPServer_init(&stop);
     
     sendMail_send("lucastmah@gmail.com");
-    while(1) {
+    while(!stop) {
         i2c_getBH1750Value();
         sleep(1);
     }
 
+    UDPServer_cleanup();
     CameraControls_cleanup();
     panTilt_cleanup();
     joystick_cleanup();

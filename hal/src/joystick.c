@@ -136,7 +136,7 @@ struct joystickState joystick_getState(void) {
     uint16_t X_value = joystick_getAxisValue('x');
     float X_scaled = joystick_applyScaling(X_value, 'x');
 
-    struct joystickState state = {X_scaled, Y_scaled};
+    struct joystickState state = {X_scaled, -Y_scaled}; // Y axis is inverted
     return state;
 }
 

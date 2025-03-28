@@ -29,7 +29,7 @@ add_custom_command(TARGET term_project POST_BUILD
      "~/cmpt433/public/myApps/term_project" 
   COMMENT "Copying ARM executable to public NFS directory")
 
-# Copy beatbox-server to NFS
+# Copy cctv-server to NFS
 add_custom_command(TARGET term_project POST_BUILD 
   COMMAND "${CMAKE_COMMAND}" -E copy_directory
      "${CMAKE_SOURCE_DIR}/cctv-server"
