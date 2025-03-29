@@ -18,12 +18,16 @@ function handleCommand(socket) {
 
 	socket.on('zoom', function(zoom) {
         console.log("Got zoom command: " + zoom);
-		relayToLocalPort(socket, "pan " + zoom, "mode-reply");
+		relayToLocalPort(socket, "zoom " + zoom, "zoom-reply");
 	});
     // Pan left, right, up, down, stop
-	socket.on('pan', function(panDirection) {
-		console.log("Got pan command: " + panDirection);
-		relayToLocalPort(socket, "pan " + panDirection, "mode-reply");
+	socket.on('pan', function(pan) {
+		console.log("Got pan command: " + pan);
+		relayToLocalPort(socket, "pan " + pan, "pan-reply");
+	});
+	socket.on('tilt', function(tilt) {
+		console.log("Got tilt command: " + tilt);
+		relayToLocalPort(socket, "tilt " + tilt, "tilt-reply");
 	});
     socket.on('stop', function(notUsed) {
 		console.log("Got stop command: ");
@@ -42,7 +46,7 @@ function relayToLocalPort(socket, data, replyCommandName) {
 	// Send an error if we have not got a reply in a second
     var errorTimer = setTimeout(function() {
     	console.log("ERROR: No reply from local application.");
-    	socket.emit("beatbox-error", "SERVER ERROR: No response from beat-box application. Is it running?");
+    	socket.emit("cctv-error", "SERVER ERROR: No response from beat-box application. Is it running?");
     }, 1000);
 
 	

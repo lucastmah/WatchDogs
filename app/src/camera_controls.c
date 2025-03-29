@@ -19,11 +19,24 @@ void* CameraControls_Thread(void* args) {
     
     while (!stop_sampling) {
         struct joystickState state = joystick_getState();
-        panTilt_setPercent(PAN, state.X);
-        panTilt_setPercent(TILT, state.Y);
+        // servo higher number = left for x, down for y
+        panTilt_setPercent(PAN, -state.X);
+        panTilt_setPercent(TILT, -state.Y);
         sleepForMs(MS_BETWEEN_SAMPLES);
     }
     return NULL;
+}
+
+void CameraControls_pan(int direction) {
+    assert(is_initialized);
+    // servo higher number = left
+    panTilt_setPercent(PAN, -direction * 100);
+}
+
+void CameraControls_tilt(int direction) {
+    assert(is_initialized);
+    // servo higher number = down
+    panTilt_setPercent(TILT, -direction * 100);
 }
 
 void CameraControls_init(void) {

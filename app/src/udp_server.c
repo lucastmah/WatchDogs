@@ -1,5 +1,5 @@
 #include "udp_server.h"
-#include "hal/panTilt.h"
+#include "camera_controls.h"
 #include <pthread.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -34,13 +34,13 @@ static void process_response(char *messageRx, char *messageTx) {
         return;
     }
     if (strcmp(command, "pan") == 0) {
-        panTilt_setPercent(PAN, 100 * val);
-        snprintf(messageTx, MAX_LEN, "pan %d\n", 100 * val);
+        CameraControls_pan(val);
+        snprintf(messageTx, MAX_LEN, "pan %d\n", val);
         return;
     }
     if (strcmp(command, "tilt") == 0) {
-        panTilt_setPercent(TILT, 100 * val);
-        snprintf(messageTx, MAX_LEN, "tilt %d\n", 100 * val);
+        CameraControls_tilt(val);
+        snprintf(messageTx, MAX_LEN, "tilt %d\n", val);
         return;
     }
     if (strcmp(command, "zoom") == 0) {
@@ -55,7 +55,7 @@ static void process_response(char *messageRx, char *messageTx) {
 
 void* UDPServer_Thread(void* args) {
     (void) args;
-    
+
     assert(isInitialized);
 
     printf("UDP server started\n");

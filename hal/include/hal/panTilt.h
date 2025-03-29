@@ -12,7 +12,8 @@ enum Axis {
 };
 
 void panTilt_init(void);
-// Set axis from -100% to 100% value
+// Set axis from -100% to 100% value 
+// higher number for pan = left, higher number for tilt = down
 void panTilt_setPercent(enum Axis axis, int percent);
 void panTilt_cleanup(void);
 

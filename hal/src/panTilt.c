@@ -9,8 +9,6 @@
 #define PWM_BASE_FILE_PATH "/dev/hat/pwm/"
 // Servo operates in nano seconds, using 20ms standard
 #define SERVO_DEFAULT_PERIOD 20000000
-#define SERVO_MIN_VALUE 500000
-#define SERVO_MAX_VALUE 2300000
 #define SERVO_DEFAULT_VALUE 1300000
 
 #define SERVO_STEP_VALUE 100
@@ -18,6 +16,9 @@
 // Added to /boot/firmware/extlinux/extlinux.conf:
 // /overlays/k3-am67a-beagley-ai-pwm-epwm0-gpio15.dtbo /overlays/k3-am67a-beagley-ai-pwm-epwm1-gpio6.dtbo
 static char *axis_paths[] = {"GPIO15", "GPIO6"}; 
+static int axis_min_values[] = {500000, 600000};
+static int axis_max_values[] = {2300000, 2400000};
+
 static atomic_int current_positions[] = {SERVO_DEFAULT_VALUE, SERVO_DEFAULT_VALUE};
 
 // Allow module to ensure it has been initialized (once!)
@@ -72,12 +73,12 @@ void panTilt_setPercent(enum Axis axis, int percent)
     if (percent > 100) percent = 100;
     if (percent == 0) return;
 
-    int new_val = current_positions[axis] + percent * SERVO_STEP_VALUE;
-    if (new_val < SERVO_MIN_VALUE) {
-        new_val = SERVO_MIN_VALUE;
+    int new_val = current_positions[axis] + percent * SERVO_STEP_VALUE; 
+    if (new_val < axis_min_values[axis]) {
+        new_val = axis_min_values[axis];
     }
-    if (new_val > SERVO_MAX_VALUE) {
-        new_val = SERVO_MAX_VALUE;
+    if (new_val > axis_max_values[axis]) {
+        new_val = axis_max_values[axis];
     }
     printf("setting %d to %d\n", axis, new_val);
     set_pwm_property(axis, "duty_cycle", new_val);
