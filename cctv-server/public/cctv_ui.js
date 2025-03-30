@@ -33,29 +33,11 @@ function setupHoldButton(selector, onHold, interval = 50) {
 
 $(document).ready(function() {
 	setupServerMessageHandlers(socket);
-	// Setup the button clicks:
-	$('#panLeft').click(function() {
-		console.log("pan left!");
-		sendCommandToServer('pan', "0");
-	});
-	$('#panRight').click(function() {
-		console.log("pan right!");
-		sendCommandToServer('pan', "1");
-	});
-	$('#panUp').click(function() {
-		console.log("pan up!");
-		sendCommandToServer('pan', "2");
-	});
-	$('#panDown').click(function() {
-		console.log("pan down!");
-		sendCommandToServer('pan', "3");
-	});
-
 	// Set up button holds:
-	setupHoldButton('#panLeft', () => sendCommandToServer('pan', "-1"));
+	setupHoldButton('#panLeft', () => sendCommandToServer('pan', "0"));
 	setupHoldButton('#panRight', () => sendCommandToServer('pan', "1"));
 	setupHoldButton('#panUp', () => sendCommandToServer('tilt', "1"));
-	setupHoldButton('#panDown', () => sendCommandToServer('tilt', "-1"));
+	setupHoldButton('#panDown', () => sendCommandToServer('tilt', "0"));
 
 	// Setup the button clicks:
 	$('#zoomIn').click(function() {
@@ -89,6 +71,10 @@ $(document).ready(function() {
 			sendCommandToServer('talk', "0");
 		}
 	});
+	$('#stop').click(function() {
+		console.log("stopping!");
+		sendCommandToServer('stop');
+	});
 });
 
 var hideErrorTimeout;
@@ -118,6 +104,16 @@ function setupServerMessageHandlers(socket) {
 		clearServerTimeout();
 	});
 	
+	socket.on('tilt-reply', function(message) {
+		console.log("Receive Reply: tilt-reply " + message);
+		clearServerTimeout();
+	});
+
+	socket.on('stop-reply', function(message) {
+		console.log("Receive Reply: stop-reply " + message);
+		clearServerTimeout();
+	});
+
 	socket.on('server-error', errorHandler);
 }
 

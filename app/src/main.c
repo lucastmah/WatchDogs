@@ -27,9 +27,8 @@ int main() {
     led_initialize();
     i2c_init();
     joystick_init();
-    panTilt_init();
-    CameraControls_init();
-    UDPServer_init(&stop);
+    // panTilt_init();
+    // CameraControls_init();
     commands_init();
     // sendMail_send("lucastmah@gmail.com");
     // while(1) {
@@ -37,9 +36,8 @@ int main() {
     //     sleep(1);
     // }
 
-    UDPServer_cleanup();
-    CameraControls_cleanup();
-    panTilt_cleanup();
+    // CameraControls_cleanup();
+    // panTilt_cleanup();
     joystick_cleanup();
     commands_cleanup();
     led_cleanup();

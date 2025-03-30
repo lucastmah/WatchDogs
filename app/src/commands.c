@@ -18,25 +18,17 @@ static _Atomic bool open_port = false;
 static pthread_t thread_id;
 static struct timespec startTime;
 
-/*
 static char help[] = "\n\
 Accepted command examples:\n\
-volume      -- get volume; sets volume in range of 0 - 100 if parameter provided.\n\
-mode        -- get mode; sets mode if parameter provided in range [0:2].\n\
-tempo       -- get bpm; sets bpm in range of 40 - 300 bpm if parameter provided.\n\
-play        -- plays a sound in range of 0 - 2 if parameter provided. \n\
-read-uptime -- returns number of seconds since server has been up.\n\
+zoom        -- changes camera zoom. 0 to zoom in, 1 to zoom out.\n\
+pan         -- moves camera horizontally. 0 for left, 1 for right.\n\
+tilt        -- moves camera vertically. 0 for down, 1 for up.\n\
+mute        -- toggles the sound. 0 for unmute, 1 for mute.\n\
+talk        -- toggles the mic. 0 to disable mic, 1 to enable mic.\n\
 stop        -- shuts down BeagleY-AI program.\n\
 <enter>     -- repeat last command.\n";
-*/
 
-static char* commands[] = {"zoom", "pan", "mute", "talk", "stop", "help", "?", 0};
-
-// static long long compute_elapsed_time(void) {
-//     struct timespec curr;
-//     clock_gettime(CLOCK_REALTIME, &curr);
-//     return curr.tv_sec - startTime.tv_sec;
-// }
+static char* commands[] = {"zoom", "pan", "tilt", "mute", "talk", "stop", "help", "?", 0};
 
 static int retrieve_num_from_string(char* input) {
     char* endptr;
@@ -65,10 +57,21 @@ static void reply_command(int command, char* param, int socketDescriptor, struct
             snprintf(messageTx, MAX_LEN, "pan %d\n", int_param);
             break;
         case 2:
-            snprintf(messageTx, MAX_LEN, "mute %d\n", int_param);
+            snprintf(messageTx, MAX_LEN, "tilt %d\n", int_param);
             break;
         case 3:
+            snprintf(messageTx, MAX_LEN, "mute %d\n", int_param);
+            break;
+        case 4:
             snprintf(messageTx, MAX_LEN, "talk %d\n", int_param);
+            break;
+        case 5:
+            snprintf(messageTx, MAX_LEN, "stopping %d\n", int_param);
+            open_port = false;
+            break;
+        case 6:
+        case 7:
+            snprintf(messageTx, MAX_LEN, help, int_param);
             break;
         default:
             snprintf(messageTx, MAX_LEN, "Unknown command. Type 'Help' for list of valid commands.\n");
@@ -100,12 +103,6 @@ static void* listen_to_port() {
         int bytesRx = recvfrom(socketDescriptor, messageRx, MAX_LEN - 1, 0, (struct sockaddr*) &sinRemote, &sin_len);
         messageRx[bytesRx] = 0;
 
-        // convert any endlines to spaces
-        // for (int i = 0; i < bytesRx; i++) {
-        //     if (messageRx[i] == '\n') {
-        //         messageRx[i] = ' ';
-        //     }
-        // }
         // parse input into command and parameters
         char* saveptr;
         char* ptr = strtok_r(messageRx, " ", &saveptr);

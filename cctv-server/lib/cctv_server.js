@@ -30,9 +30,17 @@ function handleCommand(socket) {
 		console.log("Got tilt command: " + tilt);
 		relayToLocalPort(socket, "tilt " + tilt, "tilt-reply");
 	});
-    socket.on('stop', function(notUsed) {
-		console.log("Got stop command: ");
-		relayToLocalPort(socket, "stop", "stop-reply");
+    socket.on('mute', function(mute) {
+		console.log("Got mute command: " + mute);
+		relayToLocalPort(socket, "mute " + mute, "mute-reply");
+	});
+	socket.on('talk', function(talk) {
+		console.log("Got talk command: " + talk);
+		relayToLocalPort(socket, "talk " + talk, "talk-reply");
+	});
+	socket.on('stop', function(stop) {
+		console.log("Got stop command: " + stop);
+		relayToLocalPort(socket, "stop " + stop, "stop-reply");
 	});
 };
 
