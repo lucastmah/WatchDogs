@@ -33,7 +33,11 @@ function setupHoldButton(selector, onHold, interval = 50) {
 
 $(document).ready(function() {
 	setupServerMessageHandlers(socket);
+<<<<<<< HEAD
 	
+=======
+
+>>>>>>> 8694dbb (working website buttons)
 	// Setup the button clicks:
 	$('#panLeft').click(function() {
 		console.log("pan left!");
@@ -70,27 +74,58 @@ $(document).ready(function() {
 	$('#mute').click(function() {
 		mute = !mute;
 		if (mute) {
-			console.log("unmute!");
-			sendCommandToServer('mute', "0");	
+			console.log("mute!");
+			sendCommandToServer('mute', "1");	
 		}
 		else {
-			console.log("mute!");
-			sendCommandToServer('mute', "1");
+			console.log("unmute!");
+			sendCommandToServer('mute', "0");
 		}
 	});
-	$('#pushToTalk').click(function() {
+	$('#toggleMic').click(function() {
 		console.log("toggle mic!");
 		toggleMic = !toggleMic;
 		if (toggleMic) {
+			console.log("talk on!");
 			sendCommandToServer('talk', "1");	
 		}
 		else {
+			console.log("talk off!");
 			sendCommandToServer('talk', "0");
 		}
 	});
 });
 
 var hideErrorTimeout;
+
+function setupServerMessageHandlers(socket) {
+	// Hide error display:
+	// $('#error-box').hide(); 
+	
+	
+	socket.on('talk-reply', function(message) {
+		console.log("Receive Reply: talk-reply " + message);
+		clearServerTimeout();
+	});
+	
+	socket.on('zoom-reply', function(message) {
+		console.log("Receive Reply: zoom-reply " + message);
+		clearServerTimeout();
+	});
+	
+	socket.on('mute-reply', function(message) {
+		console.log("Receive Reply: mute-reply " + message);
+		clearServerTimeout();
+	});
+	
+	socket.on('pan-reply', function(message) {
+		console.log("Receive Reply: pan-reply " + message);
+		clearServerTimeout();
+	});
+	
+	socket.on('server-error', errorHandler);
+}
+
 function sendCommandToServer(command, options) {
 	if (communicationsTimeout == null) {
 		communicationsTimeout = setTimeout(errorHandler, 1000, 
@@ -109,11 +144,11 @@ function errorHandler(message) {
 	// Make linefeeds into <br> tag.
 //	message = replaceAll(message, "\n", "<br/>");
 	
-	$('#error-text').html(message);	
-	$('#error-box').show();
+	// $('#error-text').html(message);	
+	// $('#error-box').show();
 	
 	// Hide it after a few seconds:
 	window.clearTimeout(hideErrorTimeout);
-	hideErrorTimeout = window.setTimeout(function() {$('#error-box').hide();}, 5000);
+	// hideErrorTimeout = window.setTimeout(function() {$('#error-box').hide();}, 5000);
 	clearServerTimeout();
 }

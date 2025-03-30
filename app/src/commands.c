@@ -74,6 +74,7 @@ static void reply_command(int command, char* param, int socketDescriptor, struct
             snprintf(messageTx, MAX_LEN, "Unknown command. Type 'Help' for list of valid commands.\n");
             break;
     }
+    printf("%s\n", messageTx);
     sendto(socketDescriptor, messageTx, strlen(messageTx), 0, (struct sockaddr*) &sinRemote, sin_len);
 }
 

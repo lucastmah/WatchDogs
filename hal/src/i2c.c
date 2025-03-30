@@ -202,7 +202,7 @@ uint16_t i2c_getBH1750Value(void) {
     
     value = ((raw_read & 0xFF) << 8) | ((raw_read & 0xFF00) >> 8);
     value = value / 1.2;
-    printf("%d\n", value);
+    // printf("%d\n", value);
 
     return value;
 }
