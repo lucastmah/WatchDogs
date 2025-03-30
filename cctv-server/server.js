@@ -27,6 +27,7 @@ setInterval(() => {
 }, 1000);
 
 server.listen(PORT_NUMBER);
+console.log(`listening on ${PORT_NUMBER}`);
 
 var procServer = require('./lib/cctv_server');
 procServer.listen(server);

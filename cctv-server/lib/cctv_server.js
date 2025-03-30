@@ -6,7 +6,7 @@ var dgram    = require('dgram');
 
 exports.listen = function(server) {
 	io = socketio.listen(server);
-	io.set('log level 1');
+	// io.set('log level 1');
 	
 	io.sockets.on('connection', function(socket) {
 		handleCommand(socket);
@@ -14,7 +14,7 @@ exports.listen = function(server) {
 };
 
 function handleCommand(socket) {
-	console.log("Setting up socket handlers.");
+	// console.log("Setting up socket handlers.");
 
 	socket.on('zoom', function(zoom) {
         console.log("Got zoom command: " + zoom);

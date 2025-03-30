@@ -49,11 +49,14 @@ static void writeEmail(char *to, char *from) {
     strncat(payload_text, "\r\n", MAX_EMAIL_LENGTH);
 
     // Set "Body"
-    snprintf(buf, MAX_TEXT_WIDTH, "Movement has been detected on the cams.\r\n");
-    strncat(payload_text, buf, MAX_EMAIL_LENGTH);
+    strncat(payload_text, "Movement has been detected on the cams.\r\n", MAX_EMAIL_LENGTH);
 
-    // https://curl.se/mail/lib-2017-02/0139.html 
+    // Add an image
     // can be used to attach a photo of the movement detected on the cameras
+    // strncat(payload_text, "Content-Type: image/jpeg\r\n", MAX_EMAIL_LENGTH);
+    // strncat(payload_text, "filename=\"screenshot.jpeg\"\r\n", MAX_EMAIL_LENGTH);
+    // strncat(payload_text, "put base 64 data here\r\n", MAX_EMAIL_LENGTH);
+    // https://curl.se/mail/lib-2017-02/0139.html 
 }
 
 static size_t payload_source(void *ptr, size_t size, size_t nmemb, void *userp) {

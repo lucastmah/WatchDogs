@@ -30,7 +30,7 @@ stop        -- shuts down BeagleY-AI program.\n\
 <enter>     -- repeat last command.\n";
 */
 
-static char* commands[] = {"volume", "mode", "tempo", "play", "read-uptime", "stop", "help", "?", 0};
+static char* commands[] = {"zoom", "pan", "mute", "talk", "stop", "help", "?", 0};
 
 // static long long compute_elapsed_time(void) {
 //     struct timespec curr;
@@ -38,26 +38,38 @@ static char* commands[] = {"volume", "mode", "tempo", "play", "read-uptime", "st
 //     return curr.tv_sec - startTime.tv_sec;
 // }
 
-// static int retrieve_num_from_string(char* input) {
-//     char* endptr;
-//     int num = strtol(input, &endptr, 10);
-//     if (endptr == input) {
-//         return -1;
-//     }
-//     if (*endptr != '\0') {
-//         return -1;
-//     }
-//     return num;
-// }
+static int retrieve_num_from_string(char* input) {
+    char* endptr;
+    int num = strtol(input, &endptr, 10);
+    if (endptr == input) {
+        return -1;
+    }
+    if (*endptr != '\0') {
+        return -1;
+    }
+    return num;
+}
 
-static void reply_command(int command, int socketDescriptor, struct sockaddr_in sinRemote) {
+static void reply_command(int command, char* param, int socketDescriptor, struct sockaddr_in sinRemote) {
     char messageTx[MAX_LEN];
     unsigned int sin_len = sizeof(sinRemote);
-    // int int_param;
-    // if (param != NULL) {
-    //     int_param = retrieve_num_from_string(param);
-    // }
+    int int_param;
+    if (param != NULL) {
+        int_param = retrieve_num_from_string(param);
+    }
     switch (command) {
+        case 0:
+            snprintf(messageTx, MAX_LEN, "zoom %d\n", int_param);
+            break;
+        case 1:
+            snprintf(messageTx, MAX_LEN, "pan %d\n", int_param);
+            break;
+        case 2:
+            snprintf(messageTx, MAX_LEN, "mute %d\n", int_param);
+            break;
+        case 3:
+            snprintf(messageTx, MAX_LEN, "talk %d\n", int_param);
+            break;
         default:
             snprintf(messageTx, MAX_LEN, "Unknown command. Type 'Help' for list of valid commands.\n");
             break;
@@ -104,10 +116,10 @@ static void* listen_to_port() {
             }
         }
 
-        // ptr = strtok_r(NULL, " \n", &saveptr);
+        ptr = strtok_r(NULL, " \n", &saveptr);
 
         // Reply
-        reply_command(command, socketDescriptor, sinRemote);
+        reply_command(command, ptr, socketDescriptor, sinRemote);
     }
 
     // Close socket

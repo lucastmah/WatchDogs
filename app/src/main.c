@@ -11,6 +11,7 @@
 #include "sendMail.h"
 #include "camera_controls.h"
 #include "udp_server.h"
+#include "commands.h"
 
 void toggle_LED(bool is_on) {
     led_setBrightness(BYAI_RED, is_on);
@@ -32,14 +33,19 @@ int main() {
     
     sendMail_send("lucastmah@gmail.com");
     while(!stop) {
-        i2c_getBH1750Value();
-        sleep(1);
+    commands_init();
     }
+    // sendMail_send("lucastmah@gmail.com");
+    // while(1) {
+    //     i2c_getBH1750Value();
+    //     sleep(1);
+    // }
 
     UDPServer_cleanup();
     CameraControls_cleanup();
     panTilt_cleanup();
     joystick_cleanup();
+    commands_cleanup();
     led_cleanup();
     Gpio_cleanup();
 }

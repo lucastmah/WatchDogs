@@ -1,3 +1,5 @@
+'use strict';
+
 var socket = io.connect();
 
 socket.on('image', (data) => {
@@ -31,6 +33,24 @@ function setupHoldButton(selector, onHold, interval = 50) {
 
 $(document).ready(function() {
 	setupServerMessageHandlers(socket);
+	
+	// Setup the button clicks:
+	$('#panLeft').click(function() {
+		console.log("pan left!");
+		sendCommandToServer('pan', "0");
+	});
+	$('#panRight').click(function() {
+		console.log("pan right!");
+		sendCommandToServer('pan', "1");
+	});
+	$('#panUp').click(function() {
+		console.log("pan up!");
+		sendCommandToServer('pan', "2");
+	});
+	$('#panDown').click(function() {
+		console.log("pan down!");
+		sendCommandToServer('pan', "3");
+	});
 
 	// Set up button holds:
 	setupHoldButton('#panLeft', () => sendCommandToServer('pan', "-1"));
@@ -40,22 +60,27 @@ $(document).ready(function() {
 
 	// Setup the button clicks:
 	$('#zoomIn').click(function() {
+		console.log("zoom in!");
 		sendCommandToServer('zoom', "0");
 	});
 	$('#zoomOut').click(function() {
+		console.log("zoom out!");
 		sendCommandToServer('zoom', "1");
 	});
 	$('#mute').click(function() {
 		mute = !mute;
 		if (mute) {
-			sendCommandToServer('talk', "0");	
+			console.log("unmute!");
+			sendCommandToServer('mute', "0");	
 		}
 		else {
-			sendCommandToServer('talk', "1");
+			console.log("mute!");
+			sendCommandToServer('mute', "1");
 		}
 	});
 	$('#pushToTalk').click(function() {
-		toggleMic = !toggleMic
+		console.log("toggle mic!");
+		toggleMic = !toggleMic;
 		if (toggleMic) {
 			sendCommandToServer('talk', "1");	
 		}
@@ -63,33 +88,21 @@ $(document).ready(function() {
 			sendCommandToServer('talk', "0");
 		}
 	});
-	$('#stop').click(function() {
-		console.log("Terminating program");
-		sendCommandToServer('stop', "0");
-	});
 });
 
-function setupServerMessageHandlers(socket) {
-	// Hide error display:
-	$('#error-box').hide(); 
-	
-	socket.on('cctv-error', errorHandler);
-}
-
+var hideErrorTimeout;
 function sendCommandToServer(command, options) {
 	if (communicationsTimeout == null) {
 		communicationsTimeout = setTimeout(errorHandler, 1000, 
 				"ERROR: Unable to communicate to HTTP server. Is nodeJS server running?");
 	}
-	console.log("sending to server");
 	socket.emit(command, options);
 }
+
 function clearServerTimeout() {
 	clearTimeout(communicationsTimeout);
 	communicationsTimeout = null;
 }
-
-var hideErrorTimeout;
 
 function errorHandler(message) {
 	console.log("ERROR Handler: " + message);
