@@ -20,7 +20,6 @@ function handleCommand(socket) {
 	socket.on('zoom', function(zoom) {
         console.log("Got zoom command: " + zoom);
 		relayToLocalPort(socket, "zoom " + zoom, "zoom-reply");
-<<<<<<< HEAD
 	});
     // Pan left, right, up, down, stop
 	socket.on('pan', function(pan) {
@@ -34,23 +33,6 @@ function handleCommand(socket) {
     socket.on('stop', function(notUsed) {
 		console.log("Got stop command: ");
 		relayToLocalPort(socket, "stop", "stop-reply");
-=======
-	});
-	// mute, unmute
-	socket.on('mute', function(mute) {
-        console.log("Got mute command: " + mute);
-		relayToLocalPort(socket, "mute " + mute, "mute-reply");
-	});
-	// talk on, off
-	socket.on('talk', function(talk) {
-        console.log("Got talk command: " + talk);
-		relayToLocalPort(socket, "talk " + talk, "talk-reply");
-	});
-    // Pan left, right, up, down, stop
-	socket.on('pan', function(panDirection) {
-		console.log("Got pan command: " + panDirection);
-		relayToLocalPort(socket, "pan " + panDirection, "pan-reply");
->>>>>>> 8694dbb (working website buttons)
 	});
 };
 
@@ -65,11 +47,7 @@ function relayToLocalPort(socket, data, replyCommandName) {
 	// Send an error if we have not got a reply in a second
     var errorTimer = setTimeout(function() {
     	console.log("ERROR: No reply from local application.");
-<<<<<<< HEAD
-    	socket.emit("cctv-error", "SERVER ERROR: No response from beat-box application. Is it running?");
-=======
     	socket.emit("server-error", "SERVER ERROR: No response from beagleY-AI. Is it running?");
->>>>>>> 8694dbb (working website buttons)
     }, 1000);
 
 	

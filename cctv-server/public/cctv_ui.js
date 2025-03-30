@@ -33,11 +33,6 @@ function setupHoldButton(selector, onHold, interval = 50) {
 
 $(document).ready(function() {
 	setupServerMessageHandlers(socket);
-<<<<<<< HEAD
-	
-=======
-
->>>>>>> 8694dbb (working website buttons)
 	// Setup the button clicks:
 	$('#panLeft').click(function() {
 		console.log("pan left!");

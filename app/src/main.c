@@ -30,14 +30,7 @@ int main() {
     panTilt_init();
     CameraControls_init();
     UDPServer_init(&stop);
-    
-<<<<<<< HEAD
-    sendMail_send("lucastmah@gmail.com");
-    while(!stop) {
     commands_init();
-    }
-=======
->>>>>>> 8694dbb (working website buttons)
     // sendMail_send("lucastmah@gmail.com");
     // while(1) {
     //     i2c_getBH1750Value();
