@@ -34,10 +34,10 @@ function setupHoldButton(selector, onHold, interval = 50) {
 $(document).ready(function() {
 	setupServerMessageHandlers(socket);
 	// Set up button holds:
-	setupHoldButton('#panLeft', () => sendCommandToServer('pan', "0"));
+	setupHoldButton('#panLeft', () => sendCommandToServer('pan', "-1"));
 	setupHoldButton('#panRight', () => sendCommandToServer('pan', "1"));
 	setupHoldButton('#panUp', () => sendCommandToServer('tilt', "1"));
-	setupHoldButton('#panDown', () => sendCommandToServer('tilt', "0"));
+	setupHoldButton('#panDown', () => sendCommandToServer('tilt', "-1"));
 
 	// Setup the button clicks:
 	$('#zoomIn').click(function() {
@@ -81,7 +81,7 @@ var hideErrorTimeout;
 
 function setupServerMessageHandlers(socket) {
 	// Hide error display:
-	// $('#error-box').hide(); 
+	$('#error-box').hide(); 
 	
 	
 	socket.on('talk-reply', function(message) {
@@ -130,16 +130,18 @@ function clearServerTimeout() {
 	communicationsTimeout = null;
 }
 
+var hideErrorTimeout;
+
 function errorHandler(message) {
 	console.log("ERROR Handler: " + message);
 	// Make linefeeds into <br> tag.
 //	message = replaceAll(message, "\n", "<br/>");
 	
-	// $('#error-text').html(message);	
-	// $('#error-box').show();
+	$('#error-text').html(message);	
+	$('#error-box').show();
 	
 	// Hide it after a few seconds:
 	window.clearTimeout(hideErrorTimeout);
-	// hideErrorTimeout = window.setTimeout(function() {$('#error-box').hide();}, 5000);
+	hideErrorTimeout = window.setTimeout(function() {$('#error-box').hide();}, 5000);
 	clearServerTimeout();
 }

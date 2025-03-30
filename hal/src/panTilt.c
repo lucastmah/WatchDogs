@@ -13,8 +13,6 @@
 
 #define SERVO_STEP_VALUE 100
 
-// Added to /boot/firmware/extlinux/extlinux.conf:
-// /overlays/k3-am67a-beagley-ai-pwm-epwm0-gpio15.dtbo /overlays/k3-am67a-beagley-ai-pwm-epwm1-gpio6.dtbo
 static char *axis_paths[] = {"GPIO15", "GPIO6"}; 
 static int axis_min_values[] = {500000, 600000};
 static int axis_max_values[] = {2300000, 2400000};

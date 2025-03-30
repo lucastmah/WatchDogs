@@ -6,6 +6,13 @@
 
 #include <stdbool.h>
 
+// Pan-Tilt Setup:
+// Added to /boot/firmware/extlinux/extlinux.conf:
+// /overlays/k3-am67a-beagley-ai-pwm-epwm0-gpio15.dtbo /overlays/k3-am67a-beagley-ai-pwm-epwm1-gpio6.dtbo
+
+// $ sudo beagle-pwm-export --pin hat-10
+// $ sudo beagle-pwm-export --pin hat-31
+
 enum Axis {
     PAN,
     TILT

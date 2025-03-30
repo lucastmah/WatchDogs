@@ -1,5 +1,5 @@
 #include "commands.h"
-#include <stdbool.h>
+#include "camera_controls.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <pthread.h>
@@ -21,14 +21,16 @@ static struct timespec startTime;
 static char help[] = "\n\
 Accepted command examples:\n\
 zoom        -- changes camera zoom. 0 to zoom in, 1 to zoom out.\n\
-pan         -- moves camera horizontally. 0 for left, 1 for right.\n\
-tilt        -- moves camera vertically. 0 for down, 1 for up.\n\
+pan         -- moves camera horizontally. -1 for left, 1 for right.\n\
+tilt        -- moves camera vertically. -1 for down, 1 for up.\n\
 mute        -- toggles the sound. 0 for unmute, 1 for mute.\n\
 talk        -- toggles the mic. 0 to disable mic, 1 to enable mic.\n\
 stop        -- shuts down BeagleY-AI program.\n\
 <enter>     -- repeat last command.\n";
 
 static char* commands[] = {"zoom", "pan", "tilt", "mute", "talk", "stop", "help", "?", 0};
+
+static bool* main_thread_stop_ptr;
 
 static int retrieve_num_from_string(char* input) {
     char* endptr;
@@ -55,9 +57,11 @@ static void reply_command(int command, char* param, int socketDescriptor, struct
             break;
         case 1:
             snprintf(messageTx, MAX_LEN, "pan %d\n", int_param);
+            CameraControls_pan(int_param);
             break;
         case 2:
             snprintf(messageTx, MAX_LEN, "tilt %d\n", int_param);
+            CameraControls_tilt(int_param);
             break;
         case 3:
             snprintf(messageTx, MAX_LEN, "mute %d\n", int_param);
@@ -119,15 +123,18 @@ static void* listen_to_port() {
         // Reply
         reply_command(command, ptr, socketDescriptor, sinRemote);
     }
+    // Stop main thread
+    *main_thread_stop_ptr = true;
 
     // Close socket
     close(socketDescriptor);
     return NULL;
 }
 
-void commands_init() {
+void commands_init(bool *stop_var_ptr) {
     assert(!open_port);
     open_port = true;
+    main_thread_stop_ptr = stop_var_ptr;
     clock_gettime(CLOCK_REALTIME, &startTime);
     pthread_create(&thread_id, NULL, listen_to_port, NULL);
 }
