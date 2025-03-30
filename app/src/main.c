@@ -10,7 +10,6 @@
 #include "hal/panTilt.h"
 #include "sendMail.h"
 #include "camera_controls.h"
-#include "udp_server.h"
 #include "commands.h"
 
 void toggle_LED(bool is_on) {

@@ -217,3 +217,8 @@ void i2c_init(void) {
 
     is_initialized = true;
 }
+
+void i2c_cleanup(void) {
+    assert(is_initialized);
+    is_initialized = false;
+}
