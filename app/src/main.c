@@ -22,24 +22,23 @@ bool stop = false;
 int main() {
     motionSensor_addSubscriber(toggle_LED);
     Gpio_addLineToBulk(SENSOR_CHIP, SENSOR_PIN, motionSensor_processState);
-
+    
     Gpio_initialize();
     led_initialize();
     i2c_init();
     joystick_init();
     // panTilt_init();
     // CameraControls_init();
-    commands_init();
-    // sendMail_send("lucastmah@gmail.com");
-    // while(1) {
-    //     i2c_getBH1750Value();
-    //     sleep(1);
-    // }
+    commands_init(&stop);
+    while(!stop) {
+        sleep(1);
+    }
 
+    commands_cleanup();
     // CameraControls_cleanup();
     // panTilt_cleanup();
     joystick_cleanup();
-    commands_cleanup();
+    i2c_cleanup();
     led_cleanup();
     Gpio_cleanup();
 }
