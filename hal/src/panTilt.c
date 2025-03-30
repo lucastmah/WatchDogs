@@ -9,15 +9,16 @@
 #define PWM_BASE_FILE_PATH "/dev/hat/pwm/"
 // Servo operates in nano seconds, using 20ms standard
 #define SERVO_DEFAULT_PERIOD 20000000
-#define SERVO_DEFAULT_VALUE 1300000
-
 #define SERVO_STEP_VALUE 100
+
+#define PAN_DEFAULT_VALUE 1400000
+#define TILT_DEFAULT_VALUE 1300000
 
 static char *axis_paths[] = {"GPIO15", "GPIO6"}; 
 static int axis_min_values[] = {500000, 600000};
 static int axis_max_values[] = {2300000, 2400000};
 
-static atomic_int current_positions[] = {SERVO_DEFAULT_VALUE, SERVO_DEFAULT_VALUE};
+static atomic_int current_positions[] = {-1, -1};
 
 // Allow module to ensure it has been initialized (once!)
 static bool is_initialized = false;
@@ -65,11 +66,11 @@ static void set_pwm_enabled(const enum Axis axis, bool state)
     set_pwm_property(axis, "enable", state ? 1 : 0);
 }
 
-void panTilt_setPercent(enum Axis axis, int percent)
+bool panTilt_setPercent(enum Axis axis, int percent)
 {
     if (percent < -100) percent = -100;
     if (percent > 100) percent = 100;
-    if (percent == 0) return;
+    if (percent == 0) return false;
 
     int new_val = current_positions[axis] + percent * SERVO_STEP_VALUE; 
     if (new_val < axis_min_values[axis]) {
@@ -78,9 +79,21 @@ void panTilt_setPercent(enum Axis axis, int percent)
     if (new_val > axis_max_values[axis]) {
         new_val = axis_max_values[axis];
     }
-    printf("setting %d to %d\n", axis, new_val);
-    set_pwm_property(axis, "duty_cycle", new_val);
-    current_positions[axis] = new_val;
+    printf("debug: setting %d to %d\n", axis, new_val);
+    if (new_val != current_positions[axis]) {
+        set_pwm_property(axis, "duty_cycle", new_val);
+        current_positions[axis] = new_val;
+        return true;
+    }
+    return false;
+}
+
+void panTilt_resetAxis(enum Axis axis) {
+    int new_val = axis == PAN ? PAN_DEFAULT_VALUE : TILT_DEFAULT_VALUE;
+    if (new_val != current_positions[axis]) {
+        set_pwm_property(axis, "duty_cycle", new_val);
+        current_positions[axis] = new_val;
+    }
 }
 
 void panTilt_init(void)
@@ -93,8 +106,8 @@ void panTilt_init(void)
     set_pwm_property(TILT, "duty_cycle", 0);
     set_pwm_property(PAN, "period", SERVO_DEFAULT_PERIOD);
     set_pwm_property(TILT, "period", SERVO_DEFAULT_PERIOD);
-    set_pwm_property(PAN, "duty_cycle", SERVO_DEFAULT_VALUE);
-    set_pwm_property(TILT, "duty_cycle", SERVO_DEFAULT_VALUE);
+    panTilt_resetAxis(PAN);
+    panTilt_resetAxis(TILT);
 
     set_pwm_enabled(PAN, true);
     set_pwm_enabled(TILT, true);

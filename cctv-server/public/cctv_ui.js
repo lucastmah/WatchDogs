@@ -11,6 +11,7 @@ socket.on('image', (data) => {
 mute = true;
 toggleMic = false;
 var communicationsTimeout = null;
+var patrolling = false;
 
 function setupHoldButton(selector, onHold, interval = 50) {
     let intervalId = null;
@@ -34,10 +35,22 @@ function setupHoldButton(selector, onHold, interval = 50) {
 $(document).ready(function() {
 	setupServerMessageHandlers(socket);
 	// Set up button holds:
-	setupHoldButton('#panLeft', () => sendCommandToServer('pan', "-1"));
-	setupHoldButton('#panRight', () => sendCommandToServer('pan', "1"));
-	setupHoldButton('#panUp', () => sendCommandToServer('tilt', "1"));
-	setupHoldButton('#panDown', () => sendCommandToServer('tilt', "-1"));
+	setupHoldButton('#panLeft', () => {
+		patrolling = false;
+		sendCommandToServer('pan', "-1")
+	});
+	setupHoldButton('#panRight', () => {
+		patrolling = false;
+		sendCommandToServer('pan', "1")
+	});
+	setupHoldButton('#panUp', () => {
+		patrolling = false;
+		sendCommandToServer('tilt', "1")
+	});
+	setupHoldButton('#panDown', () => {
+		patrolling = false;
+		sendCommandToServer('tilt', "-1")
+	});
 
 	// Setup the button clicks:
 	$('#zoomIn').click(function() {
@@ -47,6 +60,18 @@ $(document).ready(function() {
 	$('#zoomOut').click(function() {
 		console.log("zoom out!");
 		sendCommandToServer('zoom', "1");
+	});
+	$('#patrol').click(function() {
+		patrolling = !patrolling;
+
+		if (patrolling) {
+			console.log("starting patrol mode!");
+			sendCommandToServer('patrol', "1");	
+		}
+		else {
+			console.log("stopping patrol mode!");
+			sendCommandToServer('patrol', "0");
+		}
 	});
 	$('#mute').click(function() {
 		mute = !mute;
@@ -106,6 +131,12 @@ function setupServerMessageHandlers(socket) {
 	
 	socket.on('tilt-reply', function(message) {
 		console.log("Receive Reply: tilt-reply " + message);
+		clearServerTimeout();
+	});
+
+	socket.on('patrol-reply', function(message) {
+		console.log("Receive Reply: patrol-reply " + message);
+		patrolling = Number(message) === 1;
 		clearServerTimeout();
 	});
 

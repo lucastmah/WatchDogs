@@ -23,12 +23,13 @@ Accepted command examples:\n\
 zoom        -- changes camera zoom. 0 to zoom in, 1 to zoom out.\n\
 pan         -- moves camera horizontally. -1 for left, 1 for right.\n\
 tilt        -- moves camera vertically. -1 for down, 1 for up.\n\
+patrol      -- sets camera patrol mode, 1 for panning left and right, 0 to stop.\n\
 mute        -- toggles the sound. 0 for unmute, 1 for mute.\n\
 talk        -- toggles the mic. 0 to disable mic, 1 to enable mic.\n\
 stop        -- shuts down BeagleY-AI program.\n\
 <enter>     -- repeat last command.\n";
 
-static char* commands[] = {"zoom", "pan", "tilt", "mute", "talk", "stop", "help", "?", 0};
+static char* commands[] = {"zoom", "pan", "tilt", "patrol", "mute", "talk", "stop", "help", "?", 0};
 
 static bool* main_thread_stop_ptr;
 
@@ -64,17 +65,21 @@ static void reply_command(int command, char* param, int socketDescriptor, struct
             CameraControls_tilt(int_param);
             break;
         case 3:
-            snprintf(messageTx, MAX_LEN, "mute %d\n", int_param);
+            snprintf(messageTx, MAX_LEN, "%d\n", int_param);
+            CameraControls_setPatrolMode(int_param);
             break;
         case 4:
-            snprintf(messageTx, MAX_LEN, "talk %d\n", int_param);
+            snprintf(messageTx, MAX_LEN, "mute %d\n", int_param);
             break;
         case 5:
+            snprintf(messageTx, MAX_LEN, "talk %d\n", int_param);
+            break;
+        case 6:
             snprintf(messageTx, MAX_LEN, "stopping %d\n", int_param);
             open_port = false;
             break;
-        case 6:
         case 7:
+        case 8:
             snprintf(messageTx, MAX_LEN, help, int_param);
             break;
         default:

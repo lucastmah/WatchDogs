@@ -30,6 +30,10 @@ function handleCommand(socket) {
 		console.log("Got tilt command: " + tilt);
 		relayToLocalPort(socket, "tilt " + tilt, "tilt-reply");
 	});
+	socket.on('patrol', function(patrol) {
+		console.log("Got patrol command: " + patrol);
+		relayToLocalPort(socket, "patrol " + patrol, "patrol-reply");
+	});
     socket.on('mute', function(mute) {
 		console.log("Got mute command: " + mute);
 		relayToLocalPort(socket, "mute " + mute, "mute-reply");

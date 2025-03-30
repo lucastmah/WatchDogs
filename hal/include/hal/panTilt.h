@@ -21,7 +21,12 @@ enum Axis {
 void panTilt_init(void);
 // Set axis from -100% to 100% value 
 // higher number for pan = left, higher number for tilt = down
-void panTilt_setPercent(enum Axis axis, int percent);
+// Returns whether servo has moved
+bool panTilt_setPercent(enum Axis axis, int percent);
+
+// Reset axis to default values
+void panTilt_resetAxis(enum Axis axis);
+
 void panTilt_cleanup(void);
 
 #endif
