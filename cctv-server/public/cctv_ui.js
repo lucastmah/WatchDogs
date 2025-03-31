@@ -8,8 +8,8 @@ socket.on('image', (data) => {
 	// image.src = `data:image/jpeg;base64,${image}`;
 });
 
-mute = true;
-toggleMic = false;
+var mute = true;
+var toggleMic = false;
 var communicationsTimeout = null;
 var patrolling = false;
 
