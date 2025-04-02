@@ -12,14 +12,9 @@
 #include "camera_controls.h"
 #include "commands.h"
 
-void toggle_LED(bool is_on) {
-    led_setBrightness(BYAI_RED, is_on);
-}
-
 bool stop = false;
 
 int main() {
-    motionSensor_addSubscriber(toggle_LED);
     Gpio_addLineToBulk(SENSOR_CHIP, SENSOR_PIN, motionSensor_processState);
     
     Gpio_initialize();
