@@ -4,7 +4,7 @@ project(reaction_timer VERSION 1.0 DESCRIPTION "reaction timer project" LANGUAGE
 
 # Compiler options (inherited by sub-folders)
 set(CMAKE_C_STANDARD 11)
-add_compile_options(-Wall -Werror -Wpedantic -Wextra -g)
+# add_compile_options(-Wall -Wpedantic -Wextra -g)
 add_compile_options(-fdiagnostics-color)
 
 # Enable address sanitizer

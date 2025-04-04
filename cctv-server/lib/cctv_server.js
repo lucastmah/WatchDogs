@@ -3,6 +3,7 @@
 var socketio = require('socket.io');
 var io; 
 var dgram    = require('dgram');
+const child = require('child_process');
 
 exports.listen = function(server) {
 	io = socketio.listen(server);
@@ -15,7 +16,38 @@ exports.listen = function(server) {
 
 function handleCommand(socket) {
 	// console.log("Setting up socket handlers.");
+	console.log('a user connected');
+	let ffmpeg = child.spawn("ffmpeg", [
+		"-re",
+		"-y",
+		"-i",
+		"udp://192.168.7.2:1234",
+		"-preset",
+		"ultrafast",
+		"-f",
+		"mjpeg",
+		"pipe:1"
+	]);
 
+	ffmpeg.on('error', function (err) {
+		console.log(err);
+		throw err;
+	});
+
+	ffmpeg.on('close', function (code) {
+		console.log('ffmpeg exited with code ' + code);
+	});
+
+	ffmpeg.stderr.on('data', function(data) {
+		// Don't remove this
+		// Child Process hangs when stderr exceed certain memory
+	});
+
+	ffmpeg.stdout.on('data', function (data) {
+		var frame = Buffer.from(data).toString('base64'); //convert raw data to string
+		io.sockets.emit('canvas',frame); //send data to client
+	});
+	
 	// Zoom in, out
 	socket.on('zoom', function(zoom) {
         console.log("Got zoom command: " + zoom);

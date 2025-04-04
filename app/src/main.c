@@ -11,6 +11,7 @@
 #include "sendMail.h"
 #include "camera_controls.h"
 #include "commands.h"
+#include "capture.h"
 
 bool stop = false;
 
@@ -23,12 +24,14 @@ int main() {
     joystick_init();
     // panTilt_init();
     // CameraControls_init();
+    capture_init();
     commands_init(&stop);
     while(!stop) {
         sleep(1);
     }
 
     commands_cleanup();
+    capture_cleanup();
     // CameraControls_cleanup();
     // panTilt_cleanup();
     joystick_cleanup();

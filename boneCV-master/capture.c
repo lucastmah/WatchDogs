@@ -6,7 +6,7 @@
  *  V4L2 video capture example
  *
  *  This program can be used and distributed without restrictions.
- *
+ *      
  *      This program is provided with the V4L2 API
  * see http://linuxtv.org/docs.php for more information
  */
@@ -491,13 +491,13 @@ static void init_device(void)
 	fprintf(stderr, "Force Format %d\n", force_format);
         if (force_format) {
 		if (force_format==2){
-                        fmt.fmt.pix.width       = 320;     
-                        fmt.fmt.pix.height      = 180;  
-                        fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
+                        fmt.fmt.pix.width       = 640;     
+                        fmt.fmt.pix.height      = 360;  
+                        // fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
                         fmt.fmt.pix.field       = V4L2_FIELD_NONE;
                         // fmt.fmt.pix.width       = 1920;     
            		// fmt.fmt.pix.height      = 1080;  
-  			// fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_H264;
+  			fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_H264;
                 	// fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED;
 		}
 		else if(force_format==1){

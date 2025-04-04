@@ -4,13 +4,14 @@
 #include <stdbool.h>
 
 static _Atomic bool enableLight = false;
-static bool isLightOn = false;
+// static bool isLightOn = false;
 
-void nightLight_processEvent(bool isRising) {
-    if (enableLight) {
-
-    }
-}
+// void nightLight_processEvent(bool isRising) {
+//     if (enableLight) {
+        
+//         led_setBrightness(BYAI_RED, isLightOn);
+//     }
+// }
 
 void nightLight_turnOn(void) {
     enableLight = true;
@@ -20,6 +21,6 @@ void nightLight_turnOff(void) {
     enableLight = false;
 }
 
-void nightLight_init(void) {
-    motionSensor_addSubscriber(nightLight_processEvent);
-}
+// void nightLight_init(void) {
+//     motionSensor_addSubscriber(nightLight_processEvent);
+// }
