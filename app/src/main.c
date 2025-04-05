@@ -25,12 +25,12 @@ int main() {
     // panTilt_init();
     // CameraControls_init();
     capture_init();
-    commands_init(&stop);
+    // commands_init(&stop);
     while(!stop) {
         sleep(1);
     }
 
-    commands_cleanup();
+    // commands_cleanup();
     capture_cleanup();
     // CameraControls_cleanup();
     // panTilt_cleanup();

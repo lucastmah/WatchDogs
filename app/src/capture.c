@@ -73,9 +73,7 @@ static enum io_method io = IO_METHOD_MMAP;
 static int fd = -1;
 struct buffer *buffers;
 static unsigned int n_buffers;
-static int out_buf;
-static int force_format = 0;
-static int frame_count = 100;
+static int frame_count = 0;
 
 // Initialize UDP connection
 static void openConnectionT(void)
@@ -130,12 +128,10 @@ static int xioctl(int fh, int request, void *arg)
 
 static void process_image(const void *p, int size)
 {
-    if (out_buf)
-    {
-        sendResponseT(p, size);
-    }
+    sendResponseT(p, size);
 
     fflush(stderr);
+    fflush(stdout);
 }
 
 static int read_frame(void)
@@ -238,16 +234,9 @@ static int read_frame(void)
 
 static void* mainloop()
 {
-    unsigned int count;
-    unsigned int loopIsInfinite = 0;
-
-    if (frame_count == 0)
-        loopIsInfinite = 1; // infinite loop
-    count = frame_count;
-
-    while ((count-- > 0) || loopIsInfinite)
+    while (isinitialized)
     {
-        while (isinitialized)
+        for(;;)
         {
             fd_set fds;
             struct timeval tv;
@@ -592,35 +581,10 @@ static void init_device(void)
     CLEAR(fmt);
 
     fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    fprintf(stderr, "Force Format %d\n", force_format);
-    if (force_format)
-    {
-        if (force_format == 2)
-        {
-            fmt.fmt.pix.width = 640;
-            fmt.fmt.pix.height = 480;
-            fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
-            fmt.fmt.pix.field = V4L2_FIELD_NONE;
-        }
-        else if (force_format == 1)
-        {
-            fmt.fmt.pix.width = 640;
-            fmt.fmt.pix.height = 480;
-            fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
-            fmt.fmt.pix.field = V4L2_FIELD_NONE;
-        }
-
-        if (-1 == xioctl(fd, VIDIOC_S_FMT, &fmt))
-            errno_exit("VIDIOC_S_FMT");
-
-        /* Note VIDIOC_S_FMT may change width and height. */
-    }
-    else
-    {
-        /* Preserve original settings as set by v4l2-ctl for example */
-        if (-1 == xioctl(fd, VIDIOC_G_FMT, &fmt))
-            errno_exit("VIDIOC_G_FMT");
-    }
+    fmt.fmt.pix.width = 640;
+    fmt.fmt.pix.height = 480;
+    fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
+    fmt.fmt.pix.field = V4L2_FIELD_NONE;
 
     /* Buggy driver paranoia. */
     min = fmt.fmt.pix.width * 2;
@@ -691,15 +655,6 @@ void capture_init(void)
     openConnectionT();
     dev_name = "/dev/video3";
 
-    force_format = 2;
-    out_buf++;
-
-    errno = 0;
-    char opt = '0';
-    frame_count = strtol(&opt, NULL, 0);
-    if (errno) {
-        errno_exit(&opt);
-    }
     open_device();
     init_device();
     start_capturing();

@@ -17,13 +17,15 @@ exports.listen = function(server) {
 function handleCommand(socket) {
 	// console.log("Setting up socket handlers.");
 	console.log('a user connected');
+	let buffer = Buffer.alloc(0);
 	let ffmpeg = child.spawn("ffmpeg", [
-		"-re",
 		"-y",
 		"-i",
 		"udp://192.168.7.2:1234",
 		"-preset",
 		"ultrafast",
+		"-vcodec",
+		"copy",
 		"-f",
 		"mjpeg",
 		"pipe:1"
@@ -41,9 +43,11 @@ function handleCommand(socket) {
 	ffmpeg.stderr.on('data', function(data) {
 		// Don't remove this
 		// Child Process hangs when stderr exceed certain memory
+		// console.error("something wrong:", data.toString());
 	});
 
-	ffmpeg.stdout.on('data', function (data) {
+	ffmpeg.stdout.on('data', function(data) {
+		// console.log("out:", data);
 		var frame = Buffer.from(data).toString('base64'); //convert raw data to string
 		io.sockets.emit('canvas',frame); //send data to client
 	});
