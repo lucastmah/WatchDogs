@@ -4,6 +4,8 @@ HOW TO USE:
 
 Need to add functions that are interested in knowing when motion is detected when initializing system first with motionSensor_addSubscriber function.
 
+Call motionSensor_init to initialize the callback from Gpio.
+
 motionSensor_processState is a callback function for Gpio.
 
 */
@@ -16,12 +18,11 @@ motionSensor_processState is a callback function for Gpio.
 #define SENSOR_CHIP 1
 #define SENSOR_PIN 38
 
-
-void motionSensor_init(void);
 void motionSensor_addSubscriber(void (*callback)(bool motion_state));
 
 void motionSensor_processState(int chip, int pin, bool is_rising);
-void motionSensor_cleanup(void);
+
+void motionSensor_init(void);
 
 
 #endif

@@ -1,4 +1,5 @@
 #include "hal/motionSensor.h"
+#include "hal/gpio.h"
 #include <stdio.h>
 #include <pthread.h>
 #include <assert.h>
@@ -32,4 +33,8 @@ void motionSensor_processState(int chip, int pin, bool is_rising) {
             subscribers[i](motion_detected);
         }
     }
+}
+
+void motionSensor_init(void) {
+    Gpio_addLineToBulk(SENSOR_CHIP, SENSOR_PIN, motionSensor_processState);
 }

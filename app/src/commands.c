@@ -1,5 +1,6 @@
 #include "commands.h"
 #include "camera_controls.h"
+#include "nightLight.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <pthread.h>
@@ -29,7 +30,7 @@ talk        -- toggles the mic. 0 to disable mic, 1 to enable mic.\n\
 stop        -- shuts down BeagleY-AI program.\n\
 <enter>     -- repeat last command.\n";
 
-static char* commands[] = {"zoom", "pan", "tilt", "patrol", "mute", "talk", "stop", "help", "?", 0};
+static char* commands[] = {"zoom", "pan", "tilt", "patrol", "mute", "talk", "motion_light", "stop", "help", "?", 0};
 
 static bool* main_thread_stop_ptr;
 
@@ -75,11 +76,15 @@ static void reply_command(int command, char* param, int socketDescriptor, struct
             snprintf(messageTx, MAX_LEN, "talk %d\n", int_param);
             break;
         case 6:
+            snprintf(messageTx, MAX_LEN, "motion_light %d\n", int_param);
+            nightLight_setLightMode(int_param);
+            break;
+        case 7:
             snprintf(messageTx, MAX_LEN, "stopping %d\n", int_param);
             open_port = false;
             break;
-        case 7:
         case 8:
+        case 9:
             snprintf(messageTx, MAX_LEN, help, int_param);
             break;
         default:

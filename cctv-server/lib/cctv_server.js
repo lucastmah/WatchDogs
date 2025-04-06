@@ -1,5 +1,3 @@
-
-// var fs       = require('fs');
 var socketio = require('socket.io');
 var io; 
 var dgram    = require('dgram');
@@ -21,7 +19,7 @@ function handleCommand(socket) {
 	let ffmpeg = child.spawn("ffmpeg", [
 		"-y",
 		"-i",
-		"udp://192.168.7.2:1234",
+		"udp://192.168.7.2:12344",
 		"-preset",
 		"ultrafast",
 		"-vcodec",
@@ -77,6 +75,10 @@ function handleCommand(socket) {
 	socket.on('talk', function(talk) {
 		console.log("Got talk command: " + talk);
 		relayToLocalPort(socket, "talk " + talk, "talk-reply");
+	});
+	socket.on('motion_light', function(motion_light) {
+		console.log("Got motion_light command: " + motion_light);
+		relayToLocalPort(socket, "motion_light " + motion_light, "motion_light-reply");
 	});
 	socket.on('stop', function(stop) {
 		console.log("Got stop command: " + stop);

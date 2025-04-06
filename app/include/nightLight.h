@@ -1,10 +1,12 @@
 #ifndef _NIGHTLIGHT_H_
 #define _NIGHTLIGHT_H_
 
-// void nightLight_processEvent(bool isRising);
+#include <stdbool.h>
 
-void nightLight_turnOn(void);
+void nightLight_processEvent(bool isRising);
 
-void nightLight_turnOff(void);
+void nightLight_setLightMode(int param);
+
+void nightLight_init(void);
 
 #endif

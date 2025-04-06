@@ -7,7 +7,13 @@ add_executable(term_project ${MY_SOURCES})
 # Make use of the HAL library
 target_link_libraries(term_project LINK_PRIVATE hal)
 
+# include lcd files
+target_link_libraries(term_project LINK_PRIVATE lcd)
+target_link_libraries(term_project LINK_PRIVATE lgpio)
+
 # curl support
+# run `sudo apt install libcurl4-openssl-dev`
+# and if not on arm apple device, run `sudo apt install libcurl4-openssl-dev:arm64`
 find_package(CURL REQUIRED)
 target_link_libraries(term_project LINK_PRIVATE CURL::libcurl)
 

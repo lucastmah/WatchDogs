@@ -8,16 +8,18 @@
 #include "hal/gpio.h"
 #include "hal/i2c.h"
 #include "hal/panTilt.h"
+#include "lcd.h"
 #include "sendMail.h"
 #include "camera_controls.h"
 #include "commands.h"
 #include "capture.h"
+#include "nightLight.h"
 
 bool stop = false;
 
 int main() {
-    Gpio_addLineToBulk(SENSOR_CHIP, SENSOR_PIN, motionSensor_processState);
-    
+    nightLight_init();
+    motionSensor_init();
     Gpio_initialize();
     led_initialize();
     i2c_init();
@@ -25,12 +27,13 @@ int main() {
     // panTilt_init();
     // CameraControls_init();
     capture_init();
-    // commands_init(&stop);
-    while(!stop) {
-        sleep(1);
-    }
+    lcd_init();
+    commands_init(&stop);
 
-    // commands_cleanup();
+    while(!stop);
+
+    commands_cleanup();
+    lcd_cleanup();
     capture_cleanup();
     // CameraControls_cleanup();
     // panTilt_cleanup();

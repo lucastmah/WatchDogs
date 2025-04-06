@@ -44,7 +44,7 @@
 #include <netdb.h>
 
 #define PORT_T 8088
-#define RPORT_T 1234
+#define RPORT_T 12344
 
 static _Atomic bool isinitialized = false;
 static pthread_t thread_id;
@@ -582,9 +582,13 @@ static void init_device(void)
 
     fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     fmt.fmt.pix.width = 640;
-    fmt.fmt.pix.height = 480;
+    fmt.fmt.pix.height = 360;
     fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
     fmt.fmt.pix.field = V4L2_FIELD_NONE;
+
+    if (-1 == xioctl(fd, VIDIOC_S_FMT, &fmt)) {
+        errno_exit("VIDIOC_S_FMT");
+    }
 
     /* Buggy driver paranoia. */
     min = fmt.fmt.pix.width * 2;

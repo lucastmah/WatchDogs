@@ -2,16 +2,11 @@
 
 var socket = io.connect();
 
-socket.on('image', (data) => {
-	console.log('data', data);
-	// const imageElm = document.getElementById('image');
-	// image.src = `data:image/jpeg;base64,${image}`;
-});
-
 var mute = true;
 var toggleMic = false;
 var communicationsTimeout = null;
 var patrolling = false;
+var motion_light = false;
 
 function setupHoldButton(selector, onHold, interval = 50) {
     let intervalId = null;
@@ -95,6 +90,17 @@ $(document).ready(function() {
 		else {
 			console.log("unmute!");
 			sendCommandToServer('mute', "0");
+		}
+	});
+	$('#motion_light').click(function() {
+		motion_light = !motion_light;
+		if (mute) {
+			console.log("turn on motion light!");
+			sendCommandToServer('motion_light', "1");	
+		}
+		else {
+			console.log("turn off motion light!");
+			sendCommandToServer('motion_light', "0");
 		}
 	});
 	$('#toggleMic').click(function() {
