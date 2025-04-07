@@ -49,7 +49,7 @@ static void writeEmail(char *to, char *from) {
     strncat(payload_text, "\r\n", MAX_EMAIL_LENGTH);
 
     // Set "Body"
-    strncat(payload_text, "Movement has been detected on the cams.\r\n", MAX_EMAIL_LENGTH);
+    strncat(payload_text, "Your camera is being attacked.\r\n", MAX_EMAIL_LENGTH);
 
     // Add an image
     // can be used to attach a photo of the movement detected on the cameras

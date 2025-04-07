@@ -17,6 +17,7 @@
 #include "capture.h"
 #include "nightLight.h"
 #include "menu.h"
+#include "shake.h"
 
 bool stop = false;
 
@@ -32,6 +33,7 @@ int main() {
     // CameraControls_init();
     capture_init();
     // AudioProc_init();
+    shake_init();
     lcd_init();
     menu_init();
     commands_init(&stop);
@@ -41,6 +43,7 @@ int main() {
     commands_cleanup();
     lcd_cleanup();
     // AudioProc_cleanup();
+    shake_cleanup();
     capture_cleanup();
     // CameraControls_cleanup();
     // panTilt_cleanup();
