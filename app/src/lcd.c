@@ -5,6 +5,8 @@
 #include "GUI_BMP.h"
 #include "hal/joystick.h"
 #include "hal/timeout.h"
+#include "nightLight.h"
+#include "camera_controls.h"
 #include <stdio.h>		//printf()
 #include <stdlib.h>		//exit()
 #include <signal.h>     //signal()
@@ -14,6 +16,10 @@
 
 #define BUFFER_SIZE 30
 
+struct menu_position {
+    int x;
+    int y;
+};
 
 static UWORD *s_fb;
 static bool isInitialized = false;
@@ -23,57 +29,97 @@ static long long startTime = 0;
 static pthread_t lcdThread;
 static pthread_mutex_t screen_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-static int menu_item = 0;
+static struct menu_position menu_positions[] = { {25, 20}, {25, 50} };
 
-static void lcd_refreshGameScreen(void) 
+void lcd_refreshGameScreen(int menu_item, bool selected) 
 {
+    int x_border, x, y, zoom, volume, box_length;
+    char buf[5];
     pthread_mutex_lock(&screen_mutex);
     {
-        // draw indicator for currently selected menu item
-
-        // draw menu items
         Paint_NewImage(s_fb, LCD_1IN54_WIDTH, LCD_1IN54_HEIGHT, 0, WHITE, 16);
         Paint_Clear(WHITE);
 
-        int x = 30;
-        int y = 10;
-        Paint_DrawString_EN(x, y, "Zoom", &Font20, WHITE, BLACK);
-        LCD_1IN54_DisplayWindows(x, y, LCD_1IN54_WIDTH - x, y + 20, s_fb);
+        // DRAW ITEM SELECTOR INDICATOR
+        Paint_DrawCircle(menu_positions[menu_item].x, menu_positions[menu_item].y, 10, BLACK, DOT_PIXEL_1X1, DRAW_FILL_EMPTY);
+        if (selected) {
+            Paint_DrawCircle(menu_positions[menu_item].x, menu_positions[menu_item].y, 8, BLACK, DOT_PIXEL_1X1, DRAW_FILL_FULL);
+        }
+        
+        x_border = 30;
+        x = x_border + 20;
+        y = 10;
 
-        y += 20;
-        Paint_DrawRectangle(x + 1, y + 1, LCD_1IN54_WIDTH - x, y + 19, BLACK, DOT_PIXEL_1X1, DRAW_FILL_EMPTY);
-        Paint_DrawRectangle(x + 3, y + 3, LCD_1IN54_WIDTH - x - 2, y + 18, BLACK, DOT_PIXEL_1X1, DRAW_FILL_FULL);
-        LCD_1IN54_DisplayWindows(x, y, LCD_1IN54_WIDTH - x, y + 20, s_fb);
+        // DRAW MENU ITEMS
+        // // Zoom
+        // Paint_DrawString_EN(x, y, "Zoom", &Font20, WHITE, BLACK);
+        // LCD_1IN54_DisplayWindows(x, y, LCD_1IN54_WIDTH - x_border, y + 20, s_fb);
 
+        // y += 20;
+        // zoom = 100;
+        // snprintf(buf, 4, "%d", zoom);
+        // box_length = ((LCD_1IN54_WIDTH - x - x - 5) * (zoom / 100)) + x + 3;
+        // Paint_DrawRectangle(x + 1, y + 1, LCD_1IN54_WIDTH - x, y + 19, BLACK, DOT_PIXEL_1X1, DRAW_FILL_EMPTY);
+        // Paint_DrawRectangle(x + 3, y + 3, box_length, y + 18, BLACK, DOT_PIXEL_1X1, DRAW_FILL_FULL);
+        // Paint_DrawString_EN(LCD_1IN54_WIDTH - x, y + 3, buf, &Font16, WHITE, BLACK);
+        // LCD_1IN54_DisplayWindows(0, y, LCD_1IN54_WIDTH, y + 20, s_fb);
+
+        // // Volume 
+        // y += 30;
+        // Paint_DrawString_EN(x, y, "Volume", &Font20, WHITE, BLACK);
+        // LCD_1IN54_DisplayWindows(x, y, LCD_1IN54_WIDTH - x_border, y + 20, s_fb);
+
+        // y += 20;
+        // volume = 0;
+        // snprintf(buf, 4, "%d", volume);
+        // box_length = ((LCD_1IN54_WIDTH - x - x - 5) * (volume / 100)) + x + 3;
+        // Paint_DrawRectangle(x + 1, y + 1, LCD_1IN54_WIDTH - x, y + 19, BLACK, DOT_PIXEL_1X1, DRAW_FILL_EMPTY);
+        // Paint_DrawRectangle(x + 3, y + 3, box_length, y + 18, BLACK, DOT_PIXEL_1X1, DRAW_FILL_FULL);
+        // Paint_DrawString_EN(LCD_1IN54_WIDTH - x, y + 3, buf, &Font16, WHITE, BLACK);
+        // LCD_1IN54_DisplayWindows(0, y, LCD_1IN54_WIDTH, y + 20, s_fb);
+        
+        // Motion Light
+        // y += 30;
+        bool lightMode = nightLight_getLightMode();
+        if (lightMode) {
+            Paint_DrawString_EN(x, y, "Light: On", &Font20, WHITE, BLACK);
+        }
+        else {
+            Paint_DrawString_EN(x, y, "Light: Off", &Font20, WHITE, BLACK);
+        }
+        LCD_1IN54_DisplayWindows(x, y, LCD_1IN54_WIDTH - x_border, y + 20, s_fb);
+
+        // // Mute State
+        // y += 30;
+        // Paint_DrawString_EN(x, y, "Mute: ", &Font20, WHITE, BLACK);
+        // LCD_1IN54_DisplayWindows(x, y, LCD_1IN54_WIDTH - x_border, y + 20, s_fb);
+
+        // Patrol
         y += 30;
-        Paint_DrawString_EN(x, y, "Volume", &Font20, WHITE, BLACK);
-        LCD_1IN54_DisplayWindows(x, y, LCD_1IN54_WIDTH - x, y + 20, s_fb);
+        // bool patrolMode = CameraControls_getPatrolMode();
+        bool patrolMode = false;
+        Paint_DrawString_EN(x, y, "Patrol: ", &Font20, WHITE, BLACK);
+        if (patrolMode) {
+            Paint_DrawString_EN(x, y, "Patrol: On", &Font20, WHITE, BLACK);
+        }
+        else {
+            Paint_DrawString_EN(x, y, "Patrol: Off", &Font20, WHITE, BLACK);
+        }
+        LCD_1IN54_DisplayWindows(x, y, LCD_1IN54_WIDTH - x_border, y + 20, s_fb);
 
-        y += 20;
-        Paint_DrawRectangle(x + 1, y + 1, LCD_1IN54_WIDTH - x, y + 19, BLACK, DOT_PIXEL_1X1, DRAW_FILL_EMPTY);
-        Paint_DrawRectangle(x + 3, y + 3, LCD_1IN54_WIDTH - x - 2, y + 18, BLACK, DOT_PIXEL_1X1, DRAW_FILL_FULL);
-        LCD_1IN54_DisplayWindows(x, y, LCD_1IN54_WIDTH - x, y + 20, s_fb);
-
-        y += 30;
-        Paint_DrawString_EN(x, y, "Motion Light", &Font20, WHITE, BLACK);
-        LCD_1IN54_DisplayWindows(x, y, LCD_1IN54_WIDTH - x, y + 20, s_fb);
-
-        y += 20;
-        Paint_DrawRectangle(x + 1, y + 1, LCD_1IN54_WIDTH - x, y + 19, BLACK, DOT_PIXEL_1X1, DRAW_FILL_EMPTY);
-        Paint_DrawRectangle(x + 3, y + 3, LCD_1IN54_WIDTH - x - 2, y + 18, BLACK, DOT_PIXEL_1X1, DRAW_FILL_FULL);
-        LCD_1IN54_DisplayWindows(x, y, LCD_1IN54_WIDTH - x, y + 20, s_fb);
+        LCD_1IN54_Display(s_fb);
     }
     pthread_mutex_unlock(&screen_mutex);
 }
 
-static void* lcd_displayRoutine()
-{   
-    while(isInitialized){
-        lcd_refreshGameScreen();
-        DEV_Delay_ms(100);
-    }
-    return NULL;
-}
+// static void* lcd_displayRoutine()
+// {   
+//     while(isInitialized){
+//         lcd_refreshGameScreen();
+//         DEV_Delay_ms(100);
+//     }
+//     return NULL;
+// }
 
 // void lcd_changeScreen(int new_screen_mode) {
 //     assert(isInitialized);
@@ -182,19 +228,19 @@ void lcd_init()
     Paint_NewImage(s_fb, LCD_1IN54_WIDTH, LCD_1IN54_HEIGHT, 0, WHITE, 16);
     Paint_Clear(WHITE);
 
-    if (pthread_create(&lcdThread, NULL, lcd_displayRoutine, NULL) != 0) {
-        perror("failed to create lcd thread");
-        exit(EXIT_FAILURE);
-    }
+    // if (pthread_create(&lcdThread, NULL, lcd_displayRoutine, NULL) != 0) {
+    //     perror("failed to create lcd thread");
+    //     exit(EXIT_FAILURE);
+    // }
 }
 void lcd_cleanup()
 {
     assert(isInitialized);
     isInitialized = false;
-    if (pthread_join(lcdThread, NULL) != 0) {
-        perror("failed to join lcd thread");
-        exit(EXIT_FAILURE);
-    }
+    // if (pthread_join(lcdThread, NULL) != 0) {
+    //     perror("failed to join lcd thread");
+    //     exit(EXIT_FAILURE);
+    // }
 
     // Module Exit
     free(s_fb);

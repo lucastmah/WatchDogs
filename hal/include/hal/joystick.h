@@ -35,6 +35,7 @@ struct joystickState {
 struct joystickState joystick_getState(void);
 
 void joystick_init(void);
+
 void joystick_cleanup(void);
 
 #endif

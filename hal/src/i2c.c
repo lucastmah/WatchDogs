@@ -211,14 +211,9 @@ void i2c_init(void) {
     assert(!is_initialized);
 
     int i2c_file_desc = init_i2c_bus(I2CDRV_LINUX_BUS, I2C_BH1750_DEVICE_ADDRESS);
-
     write_i2c_raw16(i2c_file_desc, BH1750_POWER_ON_DATA);
     write_i2c_raw16(i2c_file_desc, BH1750_MODE_DATA);
+    close(i2c_file_desc);
 
     is_initialized = true;
-}
-
-void i2c_cleanup(void) {
-    assert(is_initialized);
-    is_initialized = false;
 }

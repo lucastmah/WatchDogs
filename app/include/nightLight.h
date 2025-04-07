@@ -5,7 +5,9 @@
 
 void nightLight_processEvent(bool isRising);
 
-void nightLight_setLightMode(int param);
+void nightLight_setLightMode(bool val);
+
+bool nightLight_getLightMode(void);
 
 void nightLight_init(void);
 

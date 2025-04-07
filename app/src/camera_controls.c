@@ -47,6 +47,10 @@ bool CameraControls_setPatrolMode(bool value) {
     return value;
 }
 
+bool CameraControls_getPatrolMode(void) {
+    return is_patrolling;
+}
+
 void CameraControls_pan(int direction) {
     assert(is_initialized);
     is_patrolling = false;

@@ -32,6 +32,4 @@ int16_t i2c_getIISValue(int dimension);
 // Gets the current light reading
 uint16_t i2c_getBH1750Value(void);
 
-void i2c_cleanup(void);
-
 #endif

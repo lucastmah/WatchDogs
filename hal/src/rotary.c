@@ -6,6 +6,8 @@
 
 #define MAX_SUBSCRIBERS 5
 
+static _Atomic bool isInitialized = false;
+
 static _Atomic int knob_counter = 0;
 static _Atomic bool is_cw = true;
 
@@ -49,6 +51,7 @@ struct pushState {
 
 static void notifyPushSubscribers(void) {
     // Notify subscribers of new change
+    assert(isInitialized);
     for (int i = 0; i < push_sub_count; i++) {
         pushSubscribers[i](push_counter);
     }
@@ -56,6 +59,7 @@ static void notifyPushSubscribers(void) {
 
 static void notifyKnobSubscribers(void) {
     // Notify subscribers of new change
+    assert(isInitialized);
     for (int i = 0; i < knob_sub_count; i++) {
         knobSubscribers[i](knob_counter);
     }
@@ -66,6 +70,7 @@ static void notifyKnobSubscribers(void) {
 */
 static void check_ccw_turn(void)
 {   
+    assert(isInitialized);
     if(!is_cw) {
         knob_counter--;
         notifyKnobSubscribers();
@@ -74,6 +79,7 @@ static void check_ccw_turn(void)
 
 static void check_cw_turn(void)
 {   
+    assert(isInitialized);
     if(is_cw) {
         knob_counter++;
         notifyKnobSubscribers();
@@ -143,12 +149,14 @@ struct knobState knob_states[] = {
 };
 
 static void pressed(void) {
+    assert(isInitialized);
     if (!lock_push) {
         fell = true;
     }
 } 
 
 static void unpressed(void) {
+    assert(isInitialized);
     if (fell) {
         lock_push = true;
         timeout_start_timer(&lock_push);
@@ -179,6 +187,7 @@ struct knobState* pCurrentKnobState = &knob_states[0];
 struct pushState* pCurrentPushState = &rotary_push_states[0];
 
 void rotary_addPushSubscriber(void (*callback)(int push_count)) {
+    assert(isInitialized);
     if (push_sub_count < MAX_SUBSCRIBERS) {
         pushSubscribers[push_sub_count] = callback;
         push_sub_count++;
@@ -186,6 +195,7 @@ void rotary_addPushSubscriber(void (*callback)(int push_count)) {
 }
 
 void rotary_addKnobSubscriber(void (*callback)(int turn_counter)) {
+    assert(isInitialized);
     if (knob_sub_count < MAX_SUBSCRIBERS) {
         knobSubscribers[knob_sub_count] = callback;
         knob_sub_count++;
@@ -193,6 +203,7 @@ void rotary_addKnobSubscriber(void (*callback)(int turn_counter)) {
 }
 
 void rotary_processknobState(int chip, int pin, bool isRising) {
+    assert(isInitialized);
     if (chip == GPIO_CHIP_2) {
         struct stateKnobEvent* pStateKnobEvent = NULL;
         if(pin == PIN_A) {
@@ -220,6 +231,7 @@ void rotary_processknobState(int chip, int pin, bool isRising) {
 }
 
 void rotary_processPushState(int chip, int pin, bool isRising) {
+    assert(isInitialized);
     if (chip == GPIO_CHIP_0 && pin == 10) {
         struct statePushEvent* pStatePushEvent = NULL;
         if (isRising) {
@@ -237,9 +249,19 @@ void rotary_processPushState(int chip, int pin, bool isRising) {
 }
 
 int rotary_getKnobCounter(void) {
+    assert(isInitialized);
     return knob_counter;
 }
 
 int rotary_getPushCounter(void) {
+    assert(isInitialized);
     return push_counter;
+}
+
+void rotary_init(void) {
+    assert(!isInitialized);
+    isInitialized = true;
+    Gpio_addLineToBulk(GPIO_CHIP_2, PIN_A, rotary_processknobState);
+    Gpio_addLineToBulk(GPIO_CHIP_2, PIN_B, rotary_processknobState);
+    Gpio_addLineToBulk(GPIO_CHIP_0, PUSH_PIN, rotary_processPushState);
 }

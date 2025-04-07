@@ -21,6 +21,7 @@ To manually get the current state, call the corresponding get function.
 
 #define PIN_A 7
 #define PIN_B 8
+#define PUSH_PIN 10
 
 // Provided function will be called when the rotary knob push state is changed
 void rotary_addPushSubscriber(void (*callback)(int push_count));
@@ -37,5 +38,7 @@ void rotary_processPushState(int chip, int pin, bool isRising);
 int rotary_getKnobCounter(void);
 
 int rotary_getPushCounter(void);
+
+void rotary_init(void);
 
 #endif

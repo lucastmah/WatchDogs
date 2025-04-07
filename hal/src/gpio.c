@@ -169,12 +169,13 @@ void Gpio_cleanup(void)
 }
 
 void Gpio_addLineToBulk(int chip, int pin, void (*action)(int chip, int pin, bool is_rising)) {
+    assert(!s_isInitialized);
     gpio_lines[gpio_lines_count] = (struct gpiolines) {chip, pin, action};
     gpio_lines_count++;
 }
 
 void Gpio_close(struct gpiod_line* line)
 {
-    assert(!s_isInitialized);
+    assert(s_isInitialized);
     gpiod_line_release(line);
 }
