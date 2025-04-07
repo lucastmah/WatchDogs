@@ -3,47 +3,62 @@
 <head>
     <title>CCTV</title>
     <meta charset="UTF-8" />
-    <link type="text/css" href="styles.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-<form>
-	<div id='consolediv'>	
-		<div id='pandiv'>
-			<h2>Camera Controls</h2>
-			<p>
-				<input type="button" id="panLeft" value="Pan Left"/>
-				<input type="button" id="panRight"  value="Pan Right"/>
-				<input type="button" id="panUp"   value="Pan Up"/>
-				<input type="button" id="panDown"   value="Pan Down"/>
-				<input type="button" id="zoomIn" value="Zoom In"/>
-				<input type="button" id="zoomOut"  value="Zoom Out"/>
-				<input type="button" id="patrol" value="Toggle Patrol Mode"/>
-			</p>
+	<h1>WatchDog</h1>
+<form class="flex">
+	<canvas id="videostream" width="640" height="360"></canvas>
+	<div id="vidFeed">
+		<div id="sndCtls" class="screenCtl">
+			<div id="speakerBtn" class="circularBtn"><img id="speakerIcon" src="./speakerMute.svg"/></div>
+			<div id="micBtn" class="circularBtn"><img id="micIcon" src="./micMute.svg"/></div>
 		</div>
-		<div id='sounddiv'>
-			<h2>Sound</h2>
-			<p>
-				<input type="button" id="mute"   value="Mute/Unmute"/>
-				<input type="button" id="toggleMic"   value="Toggle Mic"/>
-			</p>
-		</div>
-		<div id='control'>
-			<p>
-				<input type="button" id="motion_light" value="Motion Night Light"/>
-				<input type="button" id="stop" value="Terminate Program"/>
-			</p>
+		<div id="zoomCtls" class="screenCtl">
+			<div id="zoomInBtn" class="circularBtn"><img src="./zoomIn.svg"/></div>
+			<div id="zoomOutBtn" class="circularBtn"><img src="./zoomOut.svg"/></div>
 		</div>
 	</div>
-	<div id='error-box'>
-		<h2>Server Error</h2>
-		<p>Server error detected. Please resolve error before continuing.</p>
-		<div><code id='error-text'>No error yet... did you hide this div correctly via Javascript? :)</code></div>
+	<div id="controlPanel">
+		<div id="patrolCtl" class="flex">
+			<p>Patrol Mode</p>
+			<div id="patrolToggle" class="switchComp">
+				<div class="knobComp"></div>
+			</div>
+		</div>
+		<div id="nightLight" class="flex">
+			<p>Motion Night Light</p>
+			<div id="nightLightToggle" class="switchComp">
+				<div class="knobComp"></div>
+			</div>
+		</div>
+		<div id="ctlSpacer"></div>
+		<div class="centeredItem flex">
+			<div id="camMoveCtls">
+				<div class="flex">
+					<div id="camUp" class="circularBtn"><img src="./arrUp.svg"/></div>
+				</div>
+				<div class="flex">
+					<div id="camLeft" class="circularBtn"><img src="./arrLeft.svg"/></div>
+					<img src="./cctv.svg" height="40px"/>
+					<div id="camRight" class="circularBtn"><img src="./arrRight.svg"/></div>
+				</div>
+				<div class="flex">
+					<div id="camDown" class="circularBtn"><img src="./arrDown.svg"/></div>
+				</div>
+			</div>
+		</div>
+		<div id="endSpacer"></div>
+		<div class="centeredItem flex">
+			<div id="terminateProgram">Terminate Program</div>
+		</div>
 	</div>
-	<img id="image">
-	<!-- <video id="video" src="http://localhost:1234/" autoplay="autoplay"></video> -->
-	 <canvas id="videostream" width="640" height="480"></canvas>
+	 
 
 </form>
+<div id='error-box'>
+	<div><code id='error-text'>No error yet... did you hide this div correctly via Javascript? :)</code></div>
+</div>
 	<script src="/socket.io/socket.io.js"></script>
 	<script src='http://code.jquery.com/jquery-1.11.1.min.js' type='text/javascript'></script>
 	<script src="./cctv_ui.js" type='text/javascript'></script>

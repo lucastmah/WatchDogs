@@ -27,7 +27,43 @@ function setupHoldButton(selector, onHold, interval = 50) {
     $(selector).on('mouseup mouseleave touchend', stop);
 }
 
+const PatrolSwitchToggle = (enable) => {
+	if (enable && !patrolling) {
+		$("#patrolToggle").addClass("active");
+		console.log("starting patrol mode!");
+		sendCommandToServer('patrol', "1");	
+	}
+	else if(!enable && patrolling){
+		$("#patrolToggle").removeClass("active");
+		console.log("stopping patrol mode!");
+		sendCommandToServer('patrol', "0");
+	}
+	patrolling = enable;
+}
+
+const NightLightToggle = () => {
+	if(motion_light){
+		$("#nightLightToggle").removeClass("active");
+		console.log("turn off motion light!");
+		sendCommandToServer('motion_light', "0");
+	}else{
+		$("#nightLightToggle").addClass("active");
+		console.log("turn on motion light!");
+		sendCommandToServer('motion_light', "1");	
+	}
+	motion_light = !motion_light;
+}
+
 $(document).ready(function() {
+
+	$("#patrolToggle").on("click", () => {
+		let mode = !patrolling;
+		PatrolSwitchToggle(mode);
+	})
+
+	$("#nightLightToggle").on("click", () => {
+		NightLightToggle();
+	})
 
 	socket.on('canvas', function(data) {
 		const canvas = $("#videostream");
@@ -43,79 +79,60 @@ $(document).ready(function() {
 
 	setupServerMessageHandlers(socket);
 	// Set up button holds:
-	setupHoldButton('#panLeft', () => {
-		patrolling = false;
+	setupHoldButton('#camLeft', () => {
+		PatrolSwitchToggle(false);
 		sendCommandToServer('pan', "-1")
 	});
-	setupHoldButton('#panRight', () => {
-		patrolling = false;
+	setupHoldButton('#camRight', () => {
+		PatrolSwitchToggle(false);
 		sendCommandToServer('pan', "1")
 	});
-	setupHoldButton('#panUp', () => {
-		patrolling = false;
+	setupHoldButton('#camUp', () => {
+		PatrolSwitchToggle(false);
 		sendCommandToServer('tilt', "1")
 	});
-	setupHoldButton('#panDown', () => {
-		patrolling = false;
+	setupHoldButton('#camDown', () => {
+		PatrolSwitchToggle(false);
 		sendCommandToServer('tilt', "-1")
 	});
 
 	// Setup the button clicks:
-	$('#zoomIn').click(function() {
+	$('#zoomInBtn').click(function() {
 		console.log("zoom in!");
 		sendCommandToServer('zoom', "0");
 	});
-	$('#zoomOut').click(function() {
+	$('#zoomOutBtn').click(function() {
 		console.log("zoom out!");
 		sendCommandToServer('zoom', "1");
 	});
-	$('#patrol').click(function() {
-		patrolling = !patrolling;
-
-		if (patrolling) {
-			console.log("starting patrol mode!");
-			sendCommandToServer('patrol', "1");	
-		}
-		else {
-			console.log("stopping patrol mode!");
-			sendCommandToServer('patrol', "0");
-		}
-	});
-	$('#mute').click(function() {
+	$('#speakerBtn').click(function() {
 		mute = !mute;
 		if (mute) {
+			$('#speakerIcon').attr("src", "./speakerMute.svg")
 			console.log("mute!");
 			sendCommandToServer('mute', "1");	
 		}
 		else {
+			$('#speakerIcon').attr("src", "./speaker.svg")
 			console.log("unmute!");
 			sendCommandToServer('mute', "0");
 		}
 	});
-	$('#motion_light').click(function() {
-		motion_light = !motion_light;
-		if (mute) {
-			console.log("turn on motion light!");
-			sendCommandToServer('motion_light', "1");	
-		}
-		else {
-			console.log("turn off motion light!");
-			sendCommandToServer('motion_light', "0");
-		}
-	});
-	$('#toggleMic').click(function() {
+	$('#micBtn').click(function() {
 		console.log("toggle mic!");
 		toggleMic = !toggleMic;
 		if (toggleMic) {
+			$('#micIcon').attr("src", "./mic.svg")
 			console.log("talk on!");
 			sendCommandToServer('talk', "1");	
 		}
 		else {
+			$('#micIcon').attr("src", "./micMute.svg")
 			console.log("talk off!");
 			sendCommandToServer('talk', "0");
 		}
 	});
-	$('#stop').click(function() {
+	$('#terminateProgram').click(function() {
 		console.log("stopping!");
 		sendCommandToServer('stop');
 	});
@@ -125,7 +142,7 @@ var hideErrorTimeout;
 
 function setupServerMessageHandlers(socket) {
 	// Hide error display:
-	$('#error-box').hide(); 
+	$('#error-box').addClass("clearError");
 	
 	
 	socket.on('talk-reply', function(message) {
@@ -188,10 +205,10 @@ function errorHandler(message) {
 //	message = replaceAll(message, "\n", "<br/>");
 	
 	$('#error-text').html(message);	
-	$('#error-box').show();
+	$('#error-box').removeClass("clearError");
 	
 	// Hide it after a few seconds:
 	window.clearTimeout(hideErrorTimeout);
-	hideErrorTimeout = window.setTimeout(function() {$('#error-box').hide();}, 5000);
+	hideErrorTimeout = window.setTimeout(function() {$('#error-box').addClass("clearError");}, 3000);
 	clearServerTimeout();
 }
