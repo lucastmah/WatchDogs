@@ -9,7 +9,7 @@
 #include "hal/i2c.h"
 #include "hal/panTilt.h"
 #include "hal/rotary.h"
-#include "audio_proc.h"
+// #include "audio_proc.h"
 #include "lcd.h"
 #include "sendMail.h"
 #include "camera_controls.h"
@@ -31,7 +31,7 @@ int main() {
     // panTilt_init();
     // CameraControls_init();
     capture_init();
-    AudioProc_init();
+    // AudioProc_init();
     lcd_init();
     menu_init();
     commands_init(&stop);
@@ -40,7 +40,7 @@ int main() {
 
     commands_cleanup();
     lcd_cleanup();
-    AudioProc_cleanup();
+    // AudioProc_cleanup();
     capture_cleanup();
     // CameraControls_cleanup();
     // panTilt_cleanup();
