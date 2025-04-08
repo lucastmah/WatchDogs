@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "hal/joystick.h"
 #include "hal/panTilt.h"
+#include "hal/R5.h"
 #include <pthread.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -16,12 +17,22 @@ static bool is_initialized = false;
 
 static atomic_bool is_patrolling = false;
 static int patrol_direction = 1;
+static bool joystick_currently_pressed = false, joystick_was_pressed = false;
 
 void* CameraControls_Thread(void* args) {
     (void) args;
     assert(is_initialized);
-    
+
     while (!stop_sampling) {
+        // Toggle patrol mode on release of joystick press
+        bool joystick_currently_pressed = R5_getJoystickButtonState();
+        if (!joystick_currently_pressed && joystick_was_pressed) {
+            joystick_was_pressed = false;
+            is_patrolling = !is_patrolling;
+        } else if (joystick_currently_pressed){
+            joystick_was_pressed = true;
+        }
+
         struct joystickState state = joystick_getState();
         if (state.X == 0 && state.Y == 0) {
             // Patrol only if no manual camera movement and set to patrol mode

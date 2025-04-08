@@ -9,6 +9,7 @@
 #include "hal/i2c.h"
 #include "hal/panTilt.h"
 #include "hal/rotary.h"
+#include "hal/R5.h"
 // #include "audio_proc.h"
 #include "lcd.h"
 #include "sendMail.h"
@@ -28,9 +29,10 @@ int main() {
     Gpio_initialize();
     // led_initialize();
     i2c_init();
+    R5_init();
     joystick_init();
-    // panTilt_init();
-    // CameraControls_init();
+    panTilt_init();
+    CameraControls_init();
     capture_init();
     // AudioProc_init();
     shake_init();
@@ -45,9 +47,10 @@ int main() {
     // AudioProc_cleanup();
     shake_cleanup();
     capture_cleanup();
-    // CameraControls_cleanup();
-    // panTilt_cleanup();
+    CameraControls_cleanup();
+    panTilt_cleanup();
     joystick_cleanup();
+    R5_cleanup();
     led_cleanup();
     Gpio_cleanup();
 }

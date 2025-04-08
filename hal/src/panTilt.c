@@ -79,7 +79,7 @@ bool panTilt_setPercent(enum Axis axis, int percent)
     if (new_val > axis_max_values[axis]) {
         new_val = axis_max_values[axis];
     }
-    printf("debug: setting %d to %d\n", axis, new_val);
+    // printf("debug: setting %d to %d\n", axis, new_val);
     if (new_val != current_positions[axis]) {
         set_pwm_property(axis, "duty_cycle", new_val);
         current_positions[axis] = new_val;

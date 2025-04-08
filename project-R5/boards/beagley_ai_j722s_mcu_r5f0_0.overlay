@@ -6,20 +6,13 @@
 
  / {
     aliases {
-        led0 = &mcu_led;
         btn0 = &mcu_btn;
+        btn1 = &jbtn;
         neopixel = &mcu_neopixel;
     };
 
     leds {
         compatible = "gpio-leds";
-
-        mcu_led: led_gpio7 {
-            // GPIO7 = CE1
-            // Zen Hat maps to PYMNL.9
-            // SoC pin B3 - Mode 7:MCU_GPIO0_9  - Address 0x04084024
-            gpios = <&mcu_gpio0 9 GPIO_ACTIVE_HIGH>;
-        };
 
         mcu_btn: btn_gpio24 {
             // GPIO24
@@ -34,6 +27,13 @@
             // SoC pin B5 - Mode 7:MCU_GPIO0_7 - Address 0x0408401C
             gpios = <&mcu_gpio0 7 GPIO_ACTIVE_HIGH>;
         };
+
+        jbtn: btn_gpio5 {
+            // GPIO5
+            // Zen Hat maps to Joystick's push-button
+            // SoC pin B20 - Mode 7:GPIO1_15 - Address 0x000F41B4
+            gpios = <&gpio1 15 GPIO_ACTIVE_HIGH>;
+        };
     };
 
     // ADDED, but does not work.
@@ -43,6 +43,15 @@
         status = "okay";
     };
 
+    pinctrl_main: pinctrl_main@f4000 {
+        compatible = "ti,k3-pinctrl";
+        reg = <0x00f4000 0x88>;
+        status = "okay";
+    };
+};
+
+&uart1 {
+    status = "disabled";
 };
 
 // ADDED, but does not work.
@@ -54,14 +63,27 @@
     //      gpioset gpiochip0 7=1
     // on clean boot to make it flash the LED and read the pin.
     mcu_gpio0_led_btn_default: mcu_gpio0_led_btn_default {
-        pinmux = <K3_PINMUX(0x0024, PIN_OUTPUT, MUX_MODE_7)>; /* (B3) GPIO7*/
         pinmux = <K3_PINMUX(0x0028, PIN_INPUT,  MUX_MODE_7)>; /* (C8) GPIO24*/
         pinmux = <K3_PINMUX(0x001C, PIN_OUTPUT, MUX_MODE_7)>; /* (B5) GPIO23*/
     };
 };
 
+&pinctrl_main {
+    gpio1_led_btn_default: gpio1_led_btn_default {
+        pinmux = <
+            K3_PINMUX(0x01B4, PIN_INPUT,  MUX_MODE_7) /* (B20) GPIO5*/
+        >;
+    };
+};
+
 &mcu_gpio0 {
     pinctrl-0 = <&mcu_gpio0_led_btn_default>;
+    pinctrl-names = "default";
+    status = "okay";
+};
+
+&gpio1 {
+    pinctrl-0 = <&gpio1_led_btn_default>;
     pinctrl-names = "default";
     status = "okay";
 };

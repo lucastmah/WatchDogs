@@ -1,11 +1,11 @@
 #include "nightLight.h"
 #include "utils.h"
-#include "sharedMem.h"
 #include "hal/motionSensor.h"
 #include "hal/gpio.h"
 #include "hal/timeout.h"
 #include "hal/lightSensor.h"
 #include "hal/led.h"
+#include "hal/R5.h"
 #include <pthread.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -21,8 +21,8 @@ static pthread_t thread_id;
 static pthread_mutex_t thread_mutex = PTHREAD_MUTEX_INITIALIZER;
 static long long start_countdown = -1;
 
-static int on_arr[8] = {RED_BRIGHT, RED_BRIGHT, RED_BRIGHT, RED_BRIGHT, RED_BRIGHT, RED_BRIGHT, RED_BRIGHT, RED_BRIGHT};
-static int off_arr[8] = {OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF};
+static enum Colour on_arr[8] = {RED_BRIGHT, RED_BRIGHT, RED_BRIGHT, RED_BRIGHT, RED_BRIGHT, RED_BRIGHT, RED_BRIGHT, RED_BRIGHT};
+static enum Colour off_arr[8] = {OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF};
 
 static void* nightLight_loop() {
     while (enableLight) {
@@ -33,7 +33,7 @@ static void* nightLight_loop() {
         if (start_countdown != -1 && (getTimeInMs() - start_countdown > LIGHT_ON_LENGTH)) {
             start_countdown = -1;
             // turns off the lights
-            sharedMem_setValues(off_arr);
+            R5_setLEDs(off_arr);
         }
         sleep(1);
     }
@@ -44,7 +44,7 @@ void nightLight_processEvent(bool isRising) {
     bool isDark = lightSensor_getReading() < LIT_ROOM;
     if (enableLight && isDark && isRising) {
         // turns on the lights
-        sharedMem_setValues(on_arr);
+        R5_setLEDs(on_arr);
     }
     if (enableLight && !isRising && !eventLockout) {
         lightsEvent = true;
@@ -72,7 +72,7 @@ static void nightLight_turnOff(void) {
             perror("failed to join night light thread");
             exit(EXIT_FAILURE);
         }
-        sharedMem_setValues(off_arr);
+        R5_setLEDs(off_arr);
     }
     pthread_mutex_unlock(&thread_mutex);
 }
@@ -92,5 +92,5 @@ bool nightLight_getLightMode(void) {
 
 void nightLight_init(void) {
     motionSensor_addSubscriber(nightLight_processEvent);
-    sharedMem_setValues(off_arr);
+    R5_setLEDs(off_arr);
 }
