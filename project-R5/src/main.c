@@ -50,12 +50,12 @@ volatile int junk_delay = 0;
 
 // Device tree nodes for pin aliases
 // #define LED0_NODE DT_ALIAS(led0)
-// #define BTN0_NODE DT_ALIAS(btn0)
+#define BTN0_NODE DT_ALIAS(btn0)
 #define NEOPIXEL_NODE DT_ALIAS(neopixel)
 #define BTN1_NODE DT_ALIAS(btn1)
 
 // static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
-// static const struct gpio_dt_spec btn = GPIO_DT_SPEC_GET(BTN0_NODE, gpios);
+static const struct gpio_dt_spec btn = GPIO_DT_SPEC_GET(BTN0_NODE, gpios);
 static const struct gpio_dt_spec neopixel = GPIO_DT_SPEC_GET(NEOPIXEL_NODE, gpios);
 static const struct gpio_dt_spec jbtn = GPIO_DT_SPEC_GET(BTN1_NODE, gpios);
 
@@ -78,7 +78,7 @@ int main(void)
 	printf("Hello World! %s\n", CONFIG_BOARD_TARGET);
 
 	// initialize_gpio(&led, GPIO_OUTPUT_ACTIVE);
-	// initialize_gpio(&btn, GPIO_INPUT);
+	initialize_gpio(&btn, GPIO_INPUT);
 	initialize_gpio(&neopixel, GPIO_OUTPUT_ACTIVE);
 	initialize_gpio(&jbtn, GPIO_INPUT);
 
@@ -99,16 +99,9 @@ int main(void)
 	// }
 	
 	// setSharedMem_uint32(BASE, LED_DELAY_MS_OFFSET, DEFAULT_LED_DELAY_MS);
-	// setSharedMem_uint32(BASE, IS_BUTTON_PRESSED_OFFSET, 0);
+	setSharedMem_uint32(BASE, IS_ENC_BUTTON_PRESSED_OFFSET, 0);
 	setSharedMem_uint32(BASE, IS_JOY_BUTTON_PRESSED_OFFSET, 0);
-	// setSharedMem_uint32(BASE, BTN_COUNT_OFFSET, 0);
-	// setSharedMem_uint32(BASE, LOOP_COUNT_OFFSET, 0);
-	
-	// printf("Contents of Shared Memory BTCM After Write:\n");
-	// for (int i = MSG_OFFSET; i < END_MEMORY_OFFSET; i++) {
-	// 	uint8_t val = getSharedMem_uint8(BASE, i);
-	// 	printf("0x%08x = %2x (%c)\n", i, val, val);
-	// }
+
 	while (true) {
 		gpio_pin_set_dt(&neopixel, 0);
 		DELAY_NS(NEO_RESET_NS);
@@ -133,13 +126,13 @@ int main(void)
 		NEO_DELAY_RESET();
 
 		// Read GPIO state and share with Linux
-		// int state = gpio_pin_get_dt(&btn);
-		// bool isPressed = state == 0;
+		int encoderState = gpio_pin_get_dt(&btn);
+		bool isEncoderPressed = encoderState == 0;
 		int joystickState = gpio_pin_get_dt(&jbtn);
 		bool isJoystickPressed = joystickState == 0;
 
 		// Update shared memory to Linux
-		// setSharedMem_uint32(BASE, IS_BUTTON_PRESSED_OFFSET, isPressed);
+		setSharedMem_uint32(BASE, IS_ENC_BUTTON_PRESSED_OFFSET, isEncoderPressed);
 		setSharedMem_uint32(BASE, IS_JOY_BUTTON_PRESSED_OFFSET, isJoystickPressed);
 	}
 	return 0;

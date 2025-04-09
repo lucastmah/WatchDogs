@@ -43,12 +43,16 @@ function updatePatrolButton() {
 	$("#patrolToggle").toggleClass("active", patrolling);
 }
 
+function updateNightLightButton() {
+	$("#nightLightToggle").toggleClass("active", motion_light);
+}
+
 const PatrolSwitchToggle = (enable) => {
 	if (enable && !patrolling) {
 		console.log("starting patrol mode!");
 		sendCommandToServer('patrol', "1");	
 	}
-	else if(!enable && patrolling){
+	else if (!enable && patrolling){
 		console.log("stopping patrol mode!");
 		sendCommandToServer('patrol', "0");
 	}
@@ -56,16 +60,15 @@ const PatrolSwitchToggle = (enable) => {
 }
 
 const NightLightToggle = () => {
-	if(motion_light){
-		$("#nightLightToggle").removeClass("active");
+	if (motion_light){
 		console.log("turn off motion light!");
 		sendCommandToServer('motion_light', "0");
-	}else{
-		$("#nightLightToggle").addClass("active");
+	} else {
 		console.log("turn on motion light!");
 		sendCommandToServer('motion_light', "1");	
 	}
 	motion_light = !motion_light;
+	updateNightLightButton();
 }
 
 $(document).ready(function() {
@@ -83,6 +86,10 @@ $(document).ready(function() {
 	window.setInterval(function() {
 		sendCommandToServer('patrol', "null")
 		updatePatrolButton();
+	}, 1000);
+	window.setInterval(function() {
+		sendCommandToServer('motion_light', "null")
+		updateNightLightButton();
 	}, 1000);
 
 	socket.on('canvas', function(data) {
@@ -192,8 +199,17 @@ function setupServerMessageHandlers(socket) {
 
 	socket.on('patrol-reply', function(message) {
 		console.log("Receive Reply: patrol-reply " + message);
-		if (patrolling !== undefined) {
+		if (message !== undefined) {
 			patrolling = Number(message) === 1;
+		}
+		clearServerTimeout();
+	});
+
+	socket.on('motion_light-reply', function(message) {
+		console.log("Receive Reply: motion_light-reply " + message);
+		if (message !== undefined) {
+			motion_light = Number(message) === 1;
+			console.log(motion_light);
 		}
 		clearServerTimeout();
 	});

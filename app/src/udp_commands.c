@@ -81,11 +81,16 @@ static void reply_command(int command, char* param, int socketDescriptor, struct
             snprintf(messageTx, MAX_LEN, "talk %d\n", int_param);
             break;
         case 6:
-            snprintf(messageTx, MAX_LEN, "motion_light %d\n", int_param);
-            nightLight_setLightMode(int_param);
+            bool nightlight;
+            if (int_param != -1) {
+                nightlight = nightLight_setLightMode(int_param);
+            } else {
+                nightlight = nightLight_getLightMode();
+            }
+            snprintf(messageTx, MAX_LEN, "%d\n", nightlight);
             break;
         case 7:
-            snprintf(messageTx, MAX_LEN, "stopping %d\n", int_param);
+            snprintf(messageTx, MAX_LEN, "stopping...\n");
             open_port = false;
             break;
         case 8:

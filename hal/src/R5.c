@@ -82,8 +82,6 @@ volatile void *pR5Base;
 
 void R5_init(void) {
     assert(!is_initialized);
-    // printf("  LED should change speed every 5s.\n");
-    // printf("  Press the button to see its state here.\n");
 
     // Get access to shared memory for my uses
     pR5Base = getR5MmapAddr();
@@ -101,9 +99,9 @@ void R5_cleanup(void) {
     is_initialized = false;
 }
 
-// bool R5_getButtonState() {
-//     return getSharedMem_uint32(pR5Base, IS_BUTTON_PRESSED_OFFSET);
-// }
+bool R5_getEncButtonState() {
+    return getSharedMem_uint32(pR5Base, IS_ENC_BUTTON_PRESSED_OFFSET);
+}
 
 bool R5_getJoystickButtonState() {
     assert(is_initialized);

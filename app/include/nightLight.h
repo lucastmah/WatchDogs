@@ -6,8 +6,9 @@
 
 void nightLight_processEvent(bool isRising);
 
-void nightLight_setLightMode(bool val);
-
+// Get/set/toggle night light
+bool nightLight_setLightMode(bool val);
+void nightLight_toggleLightMode(void);
 bool nightLight_getLightMode(void);
 
 void nightLight_init(void);

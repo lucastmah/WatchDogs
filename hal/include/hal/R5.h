@@ -27,8 +27,8 @@ void R5_cleanup(void);
 // Set LEDs to colours specified by input
 void R5_setLEDs(enum Colour input[]);
 
-// // Get current Rotary Encoder button state
-// bool R5_getButtonState(void);
+// Get current Rotary Encoder button state
+bool R5_getEncButtonState(void);
 
 // Get current Joystick button state
 bool R5_getJoystickButtonState(void);
