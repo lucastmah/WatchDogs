@@ -10,12 +10,14 @@
 <form class="flex">
 	<div id="srcInputs">
 		<h3>Cameras</h3>
-		<div id="src1" class="flex srcInput active">
+		<div id="src1" class="flex srcInput active offline">
 			<img id="src1Icon" src="./cctv.svg"/>
+			<badge></badge>
 			<p>Camera 1</p>
 		</div>
-		<div id="src2" class="flex srcInput">
+		<div id="src2" class="flex srcInput offline">
 			<img id="src2Icon" src="./cctv.svg"/>
+			<badge></badge>
 			<p>Camera 2</p>
 		</div>
 	</div>
@@ -67,10 +69,23 @@
 		</div>
 	</div>
 	 
-	<audio controls autoplay>
-		<source src="/audio" type="audio/webm; codecs=vorbis">
+	<audio id="audioPlayer">
+		<source src="/audio" type="audio/mp3">
 	</audio>
 </form>
+<div id="emailField" class="flex">
+	<p>Email Alerts Sent To:</p>
+	<p id="emailDisplay">lucastmah@gmail.com</p>
+	<div id="openEditor" class="btn">Edit</div>
+</div>
+<div id="editorPopup" class="flex">
+	<h3>Edit Email</h3>
+	<input id="emailInput" type="text"/>
+	<div id="popupBtns" class="flex">
+		<div id="saveEmail" class="btn">Save</div>
+		<div id="cancelEdit" class="btn warn">Cancel</div>
+	</div>
+</div>
 <div id='error-box'>
 	<div><code id='error-text'>No error yet... did you hide this div correctly via Javascript? :)</code></div>
 </div>
