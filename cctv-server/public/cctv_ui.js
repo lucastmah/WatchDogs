@@ -39,18 +39,20 @@ function setupHoldButton(selector, onHold, interval = 50) {
     $(selector).on('mouseup mouseleave touchend', stop);
 }
 
+function updatePatrolButton() {
+	$("#patrolToggle").toggleClass("active", patrolling);
+}
+
 const PatrolSwitchToggle = (enable) => {
 	if (enable && !patrolling) {
-		$("#patrolToggle").addClass("active");
 		console.log("starting patrol mode!");
 		sendCommandToServer('patrol', "1");	
 	}
 	else if(!enable && patrolling){
-		$("#patrolToggle").removeClass("active");
 		console.log("stopping patrol mode!");
 		sendCommandToServer('patrol', "0");
 	}
-	patrolling = enable;
+	updatePatrolButton();
 }
 
 const NightLightToggle = () => {
@@ -76,6 +78,12 @@ $(document).ready(function() {
 	$("#nightLightToggle").on("click", () => {
 		NightLightToggle();
 	})
+
+	// Setup a repeating function (every 1s)
+	window.setInterval(function() {
+		sendCommandToServer('patrol', "null")
+		updatePatrolButton();
+	}, 1000);
 
 	socket.on('canvas', function(data) {
 		const canvas = $("#videostream");
@@ -184,7 +192,9 @@ function setupServerMessageHandlers(socket) {
 
 	socket.on('patrol-reply', function(message) {
 		console.log("Receive Reply: patrol-reply " + message);
-		patrolling = Number(message) === 1;
+		if (patrolling !== undefined) {
+			patrolling = Number(message) === 1;
+		}
 		clearServerTimeout();
 	});
 

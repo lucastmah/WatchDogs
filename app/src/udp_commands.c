@@ -1,4 +1,4 @@
-#include "commands.h"
+#include "udp_commands.h"
 #include "camera_controls.h"
 #include "nightLight.h"
 #include <sys/socket.h>
@@ -66,8 +66,13 @@ static void reply_command(int command, char* param, int socketDescriptor, struct
             CameraControls_tilt(int_param);
             break;
         case 3:
-            snprintf(messageTx, MAX_LEN, "%d\n", int_param);
-            CameraControls_setPatrolMode(int_param);
+            bool is_patrolling;
+            if (int_param != -1) {
+                is_patrolling = CameraControls_setPatrolMode(int_param);
+            } else {
+                is_patrolling = CameraControls_getPatrolMode();
+            }
+            snprintf(messageTx, MAX_LEN, "%d\n", is_patrolling);
             break;
         case 4:
             snprintf(messageTx, MAX_LEN, "mute %d\n", int_param);
@@ -91,7 +96,6 @@ static void reply_command(int command, char* param, int socketDescriptor, struct
             snprintf(messageTx, MAX_LEN, "Unknown command. Type 'Help' for list of valid commands.\n");
             break;
     }
-    printf("%s\n", messageTx);
     sendto(socketDescriptor, messageTx, strlen(messageTx), 0, (struct sockaddr*) &sinRemote, sin_len);
 }
 
@@ -141,7 +145,7 @@ static void* listen_to_port() {
     return NULL;
 }
 
-void commands_init(bool *stop_var_ptr) {
+void UDPCommands_init(bool *stop_var_ptr) {
     assert(!open_port);
     open_port = true;
     main_thread_stop_ptr = stop_var_ptr;
@@ -149,6 +153,6 @@ void commands_init(bool *stop_var_ptr) {
     pthread_create(&thread_id, NULL, listen_to_port, NULL);
 }
 
-void commands_cleanup() {
+void UDPCommands_cleanup() {
     pthread_join(thread_id, NULL);
 }

@@ -16,12 +16,13 @@ BH1750 = Light Sensor
 #include <stdint.h>
 
 enum TLA_device {
-    JOYSTICK_X,
     JOYSTICK_Y,
+    JOYSTICK_X,
     LED_EMITTER
 };
 
 void i2c_init(void);
+void i2c_cleanup(void);
 
 // Gets the raw reading of the provided device value defined by enum TLA_device
 uint16_t i2c_getTLAValue(enum TLA_device device);

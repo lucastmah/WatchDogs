@@ -50,12 +50,13 @@ static pthread_mutex_t bus_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static int device_mapping[] = { TLA2024_CHANNEL_CONF_0, TLA2024_CHANNEL_CONF_1, TLA2024_CHANNEL_CONF_2 };
 
+static int i2c_file_desc = -1;
+
 static struct coordinate_pair iis_mapping[] = { {IIS_X_LSB, IIS_X_MSB}, {IIS_Y_LSB, IIS_Y_MSB}, {IIS_Z_LSB, IIS_Z_MSB} };
 
-static int init_i2c_bus(char* bus, int address) {
-    int i2c_file_desc = open(bus, O_RDWR);
+static void init_i2c_address(int address) {
     if (i2c_file_desc == -1) {
-        printf("I2C DRV: Unable to open bus for read/write (%s)\n", bus);
+        printf("I2C bus was not opened prior to usage (%s)\n", I2CDRV_LINUX_BUS);
         perror("Error is:");
         exit(EXIT_FAILURE);
     }
@@ -63,10 +64,9 @@ static int init_i2c_bus(char* bus, int address) {
         perror("Unable to set I2C device to slave address.");
         exit(EXIT_FAILURE);
     }
-    return i2c_file_desc;
 }
 
-static void write_i2c_reg16(int i2c_file_desc, uint8_t reg_addr, uint16_t value) {
+static void write_i2c_reg16(uint8_t reg_addr, uint16_t value) {
     int tx_size = 1 + sizeof(value);
     uint8_t buff[tx_size];
     buff[0] = reg_addr;
@@ -79,7 +79,7 @@ static void write_i2c_reg16(int i2c_file_desc, uint8_t reg_addr, uint16_t value)
     }
 }
 
-static uint16_t read_i2c_reg16(int i2c_file_desc, uint8_t reg_addr) {
+static uint16_t read_i2c_reg16(uint8_t reg_addr) {
     // To read a register, must first write the address
     int bytes_written = write(i2c_file_desc, &reg_addr, sizeof(reg_addr));
     if (bytes_written != sizeof(reg_addr)) {
@@ -96,18 +96,28 @@ static uint16_t read_i2c_reg16(int i2c_file_desc, uint8_t reg_addr) {
     return value;
 }
 
+static void sleepForMs(long long delayInMs)
+{
+    const long long NS_PER_MS = 1000 * 1000;
+    const long long NS_PER_SECOND = 1000000000;
+    long long delayNs = delayInMs * NS_PER_MS;
+    int seconds = delayNs / NS_PER_SECOND;
+    int nanoseconds = delayNs % NS_PER_SECOND;
+    struct timespec reqDelay = {seconds, nanoseconds};
+    nanosleep(&reqDelay, (struct timespec *)NULL);
+}
+
 uint16_t i2c_getTLAValue(enum TLA_device device) {
     assert(is_initialized);
     uint16_t value;
 
     pthread_mutex_lock(&bus_mutex);
 
-    int i2c_file_desc = init_i2c_bus(I2CDRV_LINUX_BUS, I2C_TLA2024_DEVICE_ADDRESS);
+    init_i2c_address(I2C_TLA2024_DEVICE_ADDRESS);
 
-    write_i2c_reg16(i2c_file_desc, TLA2024_REG_CONFIGURATION, device_mapping[device]);
-    uint16_t raw_read = read_i2c_reg16(i2c_file_desc, TLA2024_REG_DATA);
-
-    close(i2c_file_desc);
+    write_i2c_reg16(TLA2024_REG_CONFIGURATION, device_mapping[device]);
+    sleepForMs(5); // Add delay to allow configuration to set correctly
+    uint16_t raw_read = read_i2c_reg16(TLA2024_REG_DATA);
 
     pthread_mutex_unlock(&bus_mutex);
     
@@ -117,7 +127,7 @@ uint16_t i2c_getTLAValue(enum TLA_device device) {
     return value;
 }
 
-static void write_i2c_reg8(int i2c_file_desc, uint8_t reg_addr, uint8_t value) {
+static void write_i2c_reg8(uint8_t reg_addr, uint8_t value) {
     int tx_size = sizeof(reg_addr) + sizeof(value);
     uint8_t buff[tx_size];
     buff[0] = reg_addr;
@@ -129,7 +139,7 @@ static void write_i2c_reg8(int i2c_file_desc, uint8_t reg_addr, uint8_t value) {
     }
 }
 
-static uint8_t read_i2c_reg8(int i2c_file_desc, uint8_t reg_addr) {
+static uint8_t read_i2c_reg8(uint8_t reg_addr) {
     // To read a register, must first write the address
     int bytes_written = write(i2c_file_desc, &reg_addr, sizeof(reg_addr));
     if (bytes_written != sizeof(reg_addr)) {
@@ -151,13 +161,11 @@ int16_t i2c_getIISValue(int dimension) {
     int16_t value;
 
     pthread_mutex_lock(&bus_mutex);
-    int i2c_file_desc = init_i2c_bus(I2CDRV_LINUX_BUS, I2C_IIS_DEVICE_ADDRESS);
+    init_i2c_address(I2C_IIS_DEVICE_ADDRESS);
 
-    write_i2c_reg8(i2c_file_desc, IIS_REG_CONFIGURATION, IIS_REG_CONF_DATA);
-    uint8_t raw_read_LSB = read_i2c_reg8(i2c_file_desc, iis_mapping[dimension].lsb);
-    uint8_t raw_read_MSB = read_i2c_reg8(i2c_file_desc, iis_mapping[dimension].msb);
-
-    close(i2c_file_desc);
+    write_i2c_reg8(IIS_REG_CONFIGURATION, IIS_REG_CONF_DATA);
+    uint8_t raw_read_LSB = read_i2c_reg8(iis_mapping[dimension].lsb);
+    uint8_t raw_read_MSB = read_i2c_reg8(iis_mapping[dimension].msb);
 
     pthread_mutex_unlock(&bus_mutex);
 
@@ -166,7 +174,7 @@ int16_t i2c_getIISValue(int dimension) {
     return value;
 }
 
-static void write_i2c_raw16(int i2c_file_desc, uint8_t value) {
+static void write_i2c_raw16(uint8_t value) {
     int bytes_written = write(i2c_file_desc, &value, 1);
     if (bytes_written != 1) {
         perror("Unable to write i2c raw");
@@ -174,7 +182,7 @@ static void write_i2c_raw16(int i2c_file_desc, uint8_t value) {
     }
 }
 
-static uint16_t read_i2c_raw16(int i2c_file_desc) {
+static uint16_t read_i2c_raw16() {
     // Now read the value and return it
     uint16_t value = 0;
     int bytes_read = read(i2c_file_desc, &value, sizeof(value));
@@ -192,17 +200,15 @@ uint16_t i2c_getBH1750Value(void) {
 
     pthread_mutex_lock(&bus_mutex);
 
-    int i2c_file_desc = init_i2c_bus(I2CDRV_LINUX_BUS, I2C_BH1750_DEVICE_ADDRESS);
+    init_i2c_address(I2C_BH1750_DEVICE_ADDRESS);
 
-    uint16_t raw_read = read_i2c_raw16(i2c_file_desc);
-
-    close(i2c_file_desc);
+    uint16_t raw_read = read_i2c_raw16();
 
     pthread_mutex_unlock(&bus_mutex);
     
     value = ((raw_read & 0xFF) << 8) | ((raw_read & 0xFF00) >> 8);
     value = value / 1.2;
-    // printf("%d\n", value);
+    // printf("from i2c getBH1740: %d\n", value);
 
     return value;
 }
@@ -210,10 +216,25 @@ uint16_t i2c_getBH1750Value(void) {
 void i2c_init(void) {
     assert(!is_initialized);
 
-    int i2c_file_desc = init_i2c_bus(I2CDRV_LINUX_BUS, I2C_BH1750_DEVICE_ADDRESS);
-    write_i2c_raw16(i2c_file_desc, BH1750_POWER_ON_DATA);
-    write_i2c_raw16(i2c_file_desc, BH1750_MODE_DATA);
-    close(i2c_file_desc);
+    // Initialize i2c file descriptor
+    i2c_file_desc = open(I2CDRV_LINUX_BUS, O_RDWR);
+    if (i2c_file_desc == -1) {
+        printf("I2C DRV: Unable to open bus for read/write (%s)\n", I2CDRV_LINUX_BUS);
+        perror("Error is:");
+        exit(EXIT_FAILURE);
+    }
+
+    // Initialize light sensor reading
+    init_i2c_address(I2C_BH1750_DEVICE_ADDRESS);
+    write_i2c_raw16(BH1750_POWER_ON_DATA);
+    write_i2c_raw16(BH1750_MODE_DATA);
 
     is_initialized = true;
+}
+
+void i2c_cleanup(void) {
+    assert(is_initialized);
+
+    close(i2c_file_desc);
+    is_initialized = false;
 }
