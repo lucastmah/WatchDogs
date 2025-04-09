@@ -85,6 +85,10 @@ function handleCommand(socket) {
 		console.log("Got motion_light command: " + motion_light);
 		relayToLocalPort(socket, "motion_light " + motion_light, "motion_light-reply");
 	});
+	socket.on('email', function(email) {
+		console.log("Got email command: " + email);
+		relayToLocalPort(socket, "email " + email, "email-reply");
+	});
 	socket.on('stop', function(stop) {
 		console.log("Got stop command: " + stop);
 		relayToLocalPort(socket, "stop " + stop, "stop-reply");

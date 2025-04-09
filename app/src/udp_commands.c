@@ -1,6 +1,5 @@
 #include "udp_commands.h"
-#include "camera_controls.h"
-#include "nightLight.h"
+
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <pthread.h>
@@ -10,6 +9,10 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <time.h>
+
+#include "camera_controls.h"
+#include "nightLight.h"
+#include "shake_detection.h"
 
 #define MAX_LEN 1500
 #define PORT 12345
@@ -30,7 +33,7 @@ talk        -- toggles the mic. 0 to disable mic, 1 to enable mic.\n\
 stop        -- shuts down BeagleY-AI program.\n\
 <enter>     -- repeat last command.\n";
 
-static char* commands[] = {"zoom", "pan", "tilt", "patrol", "mute", "talk", "motion_light", "stop", "help", "?", 0};
+static char* commands[] = {"zoom", "pan", "tilt", "patrol", "mute", "talk", "motion_light", "stop", "email", "help", "?", 0};
 
 static bool* main_thread_stop_ptr;
 
@@ -94,7 +97,10 @@ static void reply_command(int command, char* param, int socketDescriptor, struct
             open_port = false;
             break;
         case 8:
+            shakeDetect_setEmail(param);
+            snprintf(messageTx, MAX_LEN, "email set");
         case 9:
+        case 10:
             snprintf(messageTx, MAX_LEN, help, int_param);
             break;
         default:
@@ -129,7 +135,7 @@ static void* listen_to_port() {
         // parse input into command and parameters
         char* saveptr;
         char* ptr = strtok_r(messageRx, " ", &saveptr);
-        
+
         command = -1;
         for (int i = 0; commands[i]; i++) {
             if (strncmp(ptr, commands[i], strlen(commands[i])) == 0) {

@@ -35,6 +35,7 @@ static void checkForEmailSend(int curr, int last) {
             last_time_email_sent = current_time;
             if (email[0]) {
                 sendMail_send(email);
+                printf("Sending email to %s\n", email);
             } else {
                 printf("No email defined\n");
             }

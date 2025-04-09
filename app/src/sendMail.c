@@ -97,7 +97,7 @@ void sendMail_send(char *sendTo) {
     writeEmail(sendTo, (char *) user);
 
     if (!user || !pass) {
-        printf("missing environment variables to send email.\n");
+        printf("Missing environment variables to send email.\n");
         return;
     }
 
