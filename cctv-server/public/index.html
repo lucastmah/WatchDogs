@@ -8,17 +8,30 @@
 <body>
 	<h1>WatchDog</h1>
 <form class="flex">
-	<canvas id="videostream" width="640" height="360"></canvas>
-	<div id="vidFeed">
-		<div id="sndCtls" class="screenCtl">
-			<div id="speakerBtn" class="circularBtn"><img id="speakerIcon" src="./speakerMute.svg"/></div>
-			<div id="micBtn" class="circularBtn"><img id="micIcon" src="./micMute.svg"/></div>
+	<div id="srcInputs">
+		<h3>Cameras</h3>
+		<div id="src1" class="flex srcInput active">
+			<img id="src1Icon" src="./cctv.svg"/>
+			<p>Camera 1</p>
 		</div>
-		<div id="zoomCtls" class="screenCtl">
-			<div id="zoomInBtn" class="circularBtn"><img src="./zoomIn.svg"/></div>
-			<div id="zoomOutBtn" class="circularBtn"><img src="./zoomOut.svg"/></div>
+		<div id="src2" class="flex srcInput">
+			<img id="src2Icon" src="./cctv.svg"/>
+			<p>Camera 2</p>
 		</div>
 	</div>
+	<div>
+		<canvas id="videostream" width="640" height="360"></canvas>
+		<div id="vidFeed">
+			<div id="sndCtls" class="screenCtl">
+				<div id="speakerBtn" class="circularBtn"><img id="speakerIcon" src="./speakerMute.svg"/></div>
+			</div>
+			<div id="zoomCtls" class="screenCtl">
+				<div id="zoomInBtn" class="circularBtn"><img src="./zoomIn.svg"/></div>
+				<div id="zoomOutBtn" class="circularBtn"><img src="./zoomOut.svg"/></div>
+			</div>
+		</div>
+	</div>
+	
 	<div id="controlPanel">
 		<div id="patrolCtl" class="flex">
 			<p>Patrol Mode</p>

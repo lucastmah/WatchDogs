@@ -1,5 +1,5 @@
 body {
-	width: 50vw;
+	width: 55vw;
 	margin-left: auto;
 	margin-right: auto;
 	background-color: #15273c;
@@ -8,7 +8,7 @@ body {
 }
 h1{
 	margin-top: 50px;
-	margin-bottom: 100px;
+	margin-bottom: 80px;
 	width: 100%;
 	text-align: center;
 	font-size: 3vw;
@@ -87,7 +87,7 @@ h2 {
 	width: 640px;
 	
 	position: absolute;
-	top: calc(50px 100px + 3vw + 5px);
+	top: calc(70px + 80px + 3vw + 5px);
 
 	.screenCtl{
 		margin: 25px;
@@ -156,11 +156,11 @@ h2 {
 }
 
 #ctlSpacer{
-	height: 10px;
+	height: 0px;
 }
 
 #endSpacer{
-	height: 20px;
+	height: 10px;
 }
 
 #terminateProgram{
@@ -214,4 +214,53 @@ h2 {
 canvas {
 	image-rendering: smooth;
 	background-color: black;
+}
+
+select {
+	margin-bottom: 10px;
+	width: 282.5px;
+	margin-right: 10px;
+}
+
+#srcInputs{
+	height: 360px;
+	margin-right: 10px;
+	color: lightgrey;
+
+	p{
+		margin: 0;
+	}
+
+	h3{
+		margin-top: 0;
+		width: 150px;
+	}
+
+	img{
+		height: 20px;
+		width: 20px;
+		margin-right: 5px;
+		filter: brightness(0) saturate(100%) invert(91%) sepia(0%) saturate(1156%) hue-rotate(170deg) brightness(102%) contrast(87%);
+	}
+
+	#speakerInIcon{
+		margin-top: -3.5px;
+		height: 30px;
+		width: 30px;
+	}
+
+	.srcInput{
+		margin: 5px;
+		padding: 5px;
+		cursor:pointer;
+	}
+	
+	.srcInput:hover{
+		background-color: #222222;
+	}
+
+	.srcInput.active{
+		color: white;
+		font-weight: 600;
+	}
 }

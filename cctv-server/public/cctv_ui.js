@@ -8,6 +8,18 @@ var communicationsTimeout = null;
 var patrolling = false;
 var motion_light = false;
 
+var lastCheckin = [
+	{
+		"lastCheckin": 0,
+		"audioSrc": "/audio",
+		"iconId": "src1Icon"
+	},
+	{
+
+	}
+]
+
+
 function setupHoldButton(selector, onHold, interval = 50) {
     let intervalId = null;
 
