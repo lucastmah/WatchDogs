@@ -23,7 +23,8 @@
 #define MAX_EVENT_COUNT 1000
 #define MAX_GPIO_LINES 10
 
-static _Atomic bool s_isInitialized = false;
+static bool is_initialized = false;
+static _Atomic bool stop = false;
 static pthread_t thread_ids[GPIO_NUM_CHIPS];
 
 static char* s_chipNames[] = {
@@ -46,7 +47,7 @@ static void* gpio_loop(void* args) {
     unsigned int chipNum = *(unsigned int *)args;
     free(args);
 
-    while(s_isInitialized) {
+    while(!stop) {
         struct gpiod_line_bulk bulkEvents;
         // watches the status of the event queues
         int result = gpiod_line_event_wait_bulk(&bulkWait[chipNum], &delay, &bulkEvents);
@@ -87,7 +88,6 @@ static void* gpio_loop(void* args) {
 //  pinNumber: such as 15
 static struct gpiod_line* Gpio_openForEvents(enum eGpioChips chip, int pinNumber)
 {
-    assert(s_isInitialized);
     struct gpiod_chip* gpiodChip = s_openGpiodChips[chip];
     struct gpiod_line* line = gpiod_chip_get_line(gpiodChip, pinNumber);
     if (!line) {
@@ -103,8 +103,7 @@ static struct gpiod_line* Gpio_openForEvents(enum eGpioChips chip, int pinNumber
 // Add a gpio line to be monitored with Gpio_addLineToBulk
 void Gpio_initialize(void)
 {
-    assert(!s_isInitialized);
-    s_isInitialized = true;
+    assert(!is_initialized);
 
     // Open GPIO Chips
     for (int i = 0; i < GPIO_NUM_CHIPS; i++) {
@@ -139,12 +138,13 @@ void Gpio_initialize(void)
             }        
         }
     }
+    is_initialized = true;
 }
 
 void Gpio_cleanup(void)
 {
-    assert(s_isInitialized);
-    s_isInitialized = false;
+    assert(is_initialized);
+    stop = true;
 
     // Rejoin threads
     for (int i = 0; i < GPIO_NUM_CHIPS; i++) {
@@ -166,16 +166,17 @@ void Gpio_cleanup(void)
             exit(EXIT_FAILURE);
         }
     }
+    is_initialized = false;
 }
 
 void Gpio_addLineToBulk(int chip, int pin, void (*action)(int chip, int pin, bool is_rising)) {
-    assert(!s_isInitialized);
+    assert(!is_initialized);
     gpio_lines[gpio_lines_count] = (struct gpiolines) {chip, pin, action};
     gpio_lines_count++;
 }
 
 void Gpio_close(struct gpiod_line* line)
 {
-    assert(s_isInitialized);
+    assert(is_initialized);
     gpiod_line_release(line);
 }

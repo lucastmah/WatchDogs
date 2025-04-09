@@ -23,6 +23,7 @@ void motionSensor_addSubscriber(void (*callback)(bool motion_state));
 void motionSensor_processState(int chip, int pin, bool is_rising);
 
 void motionSensor_init(void);
+void motionSensor_cleanup(void);
 
 
 #endif

@@ -12,4 +12,7 @@ Call lightSensor_getReading to get the latest value (reading may be delayed up t
 // Returns the current raw light sensor reading
 unsigned int lightSensor_getReading(void);
 
+void lightSensor_init(void);
+void lightSensor_cleanup(void);
+
 #endif

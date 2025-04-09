@@ -24,8 +24,10 @@ static long long start_countdown = -1;
 static enum Colour on_arr[8] = {RED_BRIGHT, RED_BRIGHT, RED_BRIGHT, RED_BRIGHT, RED_BRIGHT, RED_BRIGHT, RED_BRIGHT, RED_BRIGHT};
 static enum Colour off_arr[8] = {OFF, OFF, OFF, OFF, OFF, OFF, OFF, OFF};
 
+static bool is_initialized = false;
+
 static void* nightLight_loop() {
-    while (enableLight) {
+    while (enableLight && is_initialized) {
         if (lightsEvent) {
             lightsEvent = false;
             start_countdown = getTimeInMs();
@@ -41,6 +43,8 @@ static void* nightLight_loop() {
 }
 
 void nightLight_processEvent(bool isRising) {
+    assert(is_initialized);
+
     bool isDark = lightSensor_getReading() < LIT_ROOM;
     if (enableLight && isDark && isRising) {
         // turns on the lights
@@ -78,6 +82,8 @@ static void nightLight_turnOff(void) {
 }
 
 void nightLight_setLightMode(bool val) {
+    assert(is_initialized);
+
     if (val) {
         nightLight_turnOn();
     }
@@ -87,10 +93,19 @@ void nightLight_setLightMode(bool val) {
 }
 
 bool nightLight_getLightMode(void) {
+    assert(is_initialized);
     return enableLight;
 }
 
 void nightLight_init(void) {
+    assert(!is_initialized);
     motionSensor_addSubscriber(nightLight_processEvent);
     R5_setLEDs(off_arr);
+    is_initialized = true;
+}
+
+void nightLight_cleanup(void) {
+    assert(is_initialized);
+    R5_setLEDs(off_arr);
+    is_initialized = false;
 }

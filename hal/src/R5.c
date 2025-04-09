@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <sys/mman.h>
-
+#include <assert.h>
 #include <string.h>
 
 #include "hal/sharedDataLayout.h"
@@ -16,8 +16,10 @@
 #define BTCM_ADDR     0x79020000  // MCU BTCM (p59 TRM)
 #define MEM_LENGTH    0x8000
 
+static bool is_initialized = false;
+
 // Return the address of the base address of the ATCM memory region for the R5-MCU
-volatile void* getR5MmapAddr(void)
+static volatile void* getR5MmapAddr(void)
 {
     // Access /dev/mem to gain access to physical memory (for memory-mapped devices/specialmemory)
     int fd = open("/dev/mem", O_RDWR | O_SYNC);
@@ -38,7 +40,7 @@ volatile void* getR5MmapAddr(void)
     return pR5Base;
 }
 
-void freeR5MmapAddr(volatile void* pR5Base)
+static void freeR5MmapAddr(volatile void* pR5Base)
 {
     if (munmap((void*) pR5Base, MEM_LENGTH)) {
         perror("R5 munmap failed");
@@ -79,21 +81,24 @@ uint32_t colour[COUNT] = {
 volatile void *pR5Base;
 
 void R5_init(void) {
-    printf("Sharing memory with R5\n");
+    assert(!is_initialized);
     // printf("  LED should change speed every 5s.\n");
     // printf("  Press the button to see its state here.\n");
 
     // Get access to shared memory for my uses
     pR5Base = getR5MmapAddr();
+    is_initialized = true;
 }
 
 void R5_cleanup(void) {
+    assert(is_initialized);
     for (int i = 0; i < NEO_NUM_LEDS; i++) {
 		setSharedMem_uint32(pR5Base, NEOPIXEL_LEDS_OFFSET + i * sizeof(uint32_t), 0);
 	}
 
     // Cleanup
     freeR5MmapAddr(pR5Base);
+    is_initialized = false;
 }
 
 // bool R5_getButtonState() {
@@ -101,11 +106,13 @@ void R5_cleanup(void) {
 // }
 
 bool R5_getJoystickButtonState() {
+    assert(is_initialized);
     return getSharedMem_uint32(pR5Base, IS_JOY_BUTTON_PRESSED_OFFSET);
 }
 
 void R5_setLEDs(enum Colour input[]) 
 {
+    assert(is_initialized);
     for (int j = 0; j < NEO_NUM_LEDS; j++) {
         setSharedMem_uint32(pR5Base, NEOPIXEL_LEDS_OFFSET + j * sizeof(uint32_t), colour[input[j]]);
     }
