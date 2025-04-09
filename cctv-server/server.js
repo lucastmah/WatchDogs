@@ -16,17 +16,29 @@ app.get('/', (req, res) => {
 });
 
 app.get('/audio', (req, res) => {
-	var ffm = child.spawn(
-		"ffmpeg", 
-		"-hide_banner -loglevel error -ar 44100 -f alsa -i default:CARD=C920 -b:a 128k -f webm -".split(
-			" "
-		)
-	);
 	
-	res.writeHead(200, {"Content-Type": "audio/webm;codecs=vorbis"});
-	ffm.stdout.on("data", (data) => {
-		res.write(data)
-	});
+	res.writeHead(200, {"Content-Type": "audio/mp3"});
+
+	function startNewFfm(){
+		var ffm = child.spawn(
+			"ffmpeg", 
+			// "-f alsa -i default:CARD=C920 -fflags nobuffer -flags low_delay -probesize 32 -analyzeduration 0 -b:a 128k -f mp3 -".split(
+			// "-fflags +nobuffer -flags low_delay -hide_banner -loglevel error -ar 44100 -i udp://192.168.7.2:12343 -c:a libmp3lame -b:a 128k -f mp3 -".split(
+			"-f mp3 -i udp://192.168.7.2:12343 -t 60 -f mp3 -".split(
+				" "
+			)
+		);
+	
+		ffm.stdout.on("data", (data) => {
+			res.write(data)
+		});
+	
+		ffm.on('close', () => {
+			startNewFfm()
+		})
+	}
+
+	startNewFfm();
 });
 
 app.use(express.static(path.join(__dirname, '/public')));

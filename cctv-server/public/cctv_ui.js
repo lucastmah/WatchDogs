@@ -7,18 +7,65 @@ var toggleMic = false;
 var communicationsTimeout = null;
 var patrolling = false;
 var motion_light = false;
+var currentZoom = 0;
+var zoomSettings = {
+	increment: 1,
+	min: 0,
+	max: 30,
+	default: 0,
+	x: 40,
+	y: 30
+}
 
-var lastCheckin = [
+var current_email = "lucastmah@gmail.com";
+
+var currentCam = 0;
+var cams = [
 	{
+		"id": "src1",
 		"lastCheckin": 0,
 		"audioSrc": "/audio",
 		"iconId": "src1Icon"
 	},
 	{
-
+		"id": "src2",
+		"lastCheckin": 0,
+		"audioSrc": "/audio1",
+		"iconId": "src2Icon"
 	}
 ]
 
+function getTimeMs(){
+	let date = new Date();
+	return date.getTime()
+}
+
+function checkin(id){
+	cams[id].lastCheckin = getTimeMs()
+}
+
+function updateZoom(increase){
+	let change = 0;
+	if(increase && currentZoom < zoomSettings.max){
+		change = zoomSettings.increment;
+	}else if(!increase && currentZoom > zoomSettings.min){
+		change = -zoomSettings.increment;
+	}
+	currentZoom += change;
+}
+
+function resetZoom(){
+	currentZoom = zoomSettings.default;
+}
+
+function setCam(cam) {
+	currentCam = cam;
+	cams.forEach(c => {
+		$(`#${c.id}`).removeClass('active')
+	});
+	$(`#${cams[cam].id}`).addClass('active')
+	resetZoom();
+}
 
 function setupHoldButton(selector, onHold, interval = 50) {
     let intervalId = null;
@@ -71,7 +118,55 @@ const NightLightToggle = () => {
 	updateNightLightButton();
 }
 
+const setEditorVis = (mode) => {
+	if(mode == true){
+		$("#editorPopup").show();
+	}else{
+		$("#editorPopup").hide();
+	}
+}
+
 $(document).ready(function() {
+	setInterval(() => {
+		cams.forEach(iCam => {
+			if(getTimeMs() - iCam.lastCheckin > 5000){
+				$(`#${iCam.id}`).addClass('offline')
+			}else{
+				$(`#${iCam.id}`).removeClass('offline')
+			}
+		});
+	}, 5000);
+
+	setEditorVis(false);
+
+	$("#emailDisplay").html(current_email)
+
+	$("#openEditor").on("click", () => {
+		$("#emailInput").val(current_email);
+		setEditorVis(true);
+	})
+
+	$("#saveEmail").on("click", () => {
+		let input = $("#emailInput").val().trim()
+		if(input == ""){
+			return
+		}
+		console.log(input)
+		current_email = input
+  		sendCommandToServer('email', current_email)
+		setEditorVis(false);
+		$("#emailDisplay").html(current_email)
+	})
+
+	$("#cancelEdit").on("click", () => {
+		setEditorVis(false);
+	})
+
+	cams.forEach((c, i) => {
+		$(`#${c.id}`).on("click", () => {
+			setCam(i)
+		})
+	});
 
 	$("#patrolToggle").on("click", () => {
 		let mode = !patrolling;
@@ -87,21 +182,29 @@ $(document).ready(function() {
 		sendCommandToServer('patrol', "null")
 		updatePatrolButton();
 	}, 1000);
+	
 	window.setInterval(function() {
 		sendCommandToServer('motion_light', "null")
 		updateNightLightButton();
 	}, 1000);
 
-	socket.on('canvas', function(data) {
-		const canvas = $("#videostream");
-		const context = canvas[0].getContext('2d');
-		const image = new Image();
-		image.src = "data:image/jpeg;base64,"+data;
-		image.onload = function() {
-			context.height = image.height;
-			context.width = image.width;
-			context.drawImage(image,0,0,context.width, context.height);
-		}
+	cams.forEach((c, i) => {
+		socket.on('canvas' + i, function(data) {
+			if(currentCam != i){
+				return
+			}
+			const canvas = $("#videostream");
+			const context = canvas[0].getContext('2d');
+			const image = new Image();
+			image.src = "data:image/jpeg;base64,"+data;
+			let sX = zoomSettings.x * currentZoom
+			let sY = zoomSettings.y * currentZoom
+			image.onload = function() {
+				context.height = image.height;
+				context.width = image.width;
+				context.drawImage(image,0 - sX / 2,0 - sY / 2,context.width + sX, context.height + sY);
+			}
+		});
 	});
 
 	setupServerMessageHandlers(socket);
@@ -125,24 +228,31 @@ $(document).ready(function() {
 
 	// Setup the button clicks:
 	$('#zoomInBtn').click(function() {
-		console.log("zoom in!");
-		sendCommandToServer('zoom', "0");
+		updateZoom(true)
 	});
 	$('#zoomOutBtn').click(function() {
-		console.log("zoom out!");
-		sendCommandToServer('zoom', "1");
+		updateZoom(false)
 	});
 	$('#speakerBtn').click(function() {
 		mute = !mute;
+		let aPlayer = document.getElementById("audioPlayer");
+		// console.log(aPlayer.currentTime);
+		// console.log(aPlayer.duration);
+		
 		if (mute) {
 			$('#speakerIcon').attr("src", "./speakerMute.svg")
 			console.log("mute!");
-			sendCommandToServer('mute', "1");	
+			// sendCommandToServer('mute', "1");
+			aPlayer.pause();
 		}
 		else {
 			$('#speakerIcon').attr("src", "./speaker.svg")
 			console.log("unmute!");
-			sendCommandToServer('mute', "0");
+			// sendCommandToServer('mute', "0");
+			aPlayer.play();
+			if(aPlayer.duration != Infinity && aPlayer.duration != NaN && aPlayer.duration > 0){
+				aPlayer.currentTime = aPlayer.duration - (2 * (aPlayer.duration > 2)? 1 : 0);
+			}
 		}
 	});
 	$('#micBtn').click(function() {
@@ -171,7 +281,11 @@ function setupServerMessageHandlers(socket) {
 	// Hide error display:
 	$('#error-box').addClass("clearError");
 	
-	
+	socket.on('camStatus', (message) => {
+		checkin(message);
+		console.log(message)
+	})
+
 	socket.on('talk-reply', function(message) {
 		console.log("Receive Reply: talk-reply " + message);
 		clearServerTimeout();

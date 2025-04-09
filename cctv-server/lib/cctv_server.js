@@ -12,14 +12,11 @@ exports.listen = function(server) {
 	});
 };
 
-function handleCommand(socket) {
-	// console.log("Setting up socket handlers.");
-	console.log('a user connected');
-	let buffer = Buffer.alloc(0);
+function readVidPort(port, deviceNo){
 	let ffmpeg = child.spawn("ffmpeg", [
 		"-y",
 		"-i",
-		"udp://192.168.7.2:12344",
+		"udp://192.168.7.2:" + port,
 		"-preset",
 		"ultrafast",
 		"-vcodec",
@@ -46,9 +43,17 @@ function handleCommand(socket) {
 
 	ffmpeg.stdout.on('data', function(data) {
 		// console.log("out:", data);
+		io.sockets.emit('camStatus', deviceNo);
 		var frame = Buffer.from(data).toString('base64'); //convert raw data to string
-		io.sockets.emit('canvas',frame); //send data to client
+		io.sockets.emit('canvas' + deviceNo,frame); //send data to client
 	});
+}
+
+function handleCommand(socket) {
+	// console.log("Setting up socket handlers.");
+	console.log('a user connected');
+	readVidPort(12344, 0);
+	readVidPort(12346, 1);
 	
 	// Zoom in, out
 	socket.on('zoom', function(zoom) {

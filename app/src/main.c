@@ -15,6 +15,7 @@
 // #include "video_capture.h"
 #include "nightLight.h"
 #include "shake_detection.h"
+#include "audio_proc.h"
 
 bool stop = false;
 
@@ -39,6 +40,7 @@ int main() {
     ButtonControls_init();
 
     // capture_init();
+    AudioProc_init();
     shakeDetect_init();
     UDPCommands_init(&stop);
 
@@ -50,6 +52,7 @@ int main() {
     // Main module cleanup
     UDPCommands_cleanup();
     shakeDetect_cleanup();
+    AudioProc_cleanup();
     // capture_cleanup();
     ButtonControls_cleanup();
     CameraControls_cleanup();
