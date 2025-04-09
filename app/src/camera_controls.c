@@ -1,5 +1,6 @@
 #include "camera_controls.h"
 #include "utils.h"
+#include "lcd.h"
 #include "hal/joystick.h"
 #include "hal/panTilt.h"
 #include "hal/R5.h"
@@ -34,6 +35,7 @@ void* CameraControls_Thread(void* args) {
             }
         } else {
             is_patrolling = false;
+            lcd_wakeScreen();
             // servo higher number = left for x, down for y
             panTilt_setPercent(PAN, -state.X);
             panTilt_setPercent(TILT, -state.Y);

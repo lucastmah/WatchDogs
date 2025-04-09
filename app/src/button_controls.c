@@ -6,6 +6,7 @@
 
 #include "hal/R5.h"
 #include "camera_controls.h"
+#include "lcd.h"
 #include "nightLight.h"
 
 static bool is_initialized = false;
@@ -25,6 +26,9 @@ void* ButtonControls_Thread(void* args) {
             joystick_was_pressed = false;
             CameraControls_togglePatrolMode();
         } else if (joystick_currently_pressed){
+            if (!joystick_was_pressed) {
+                lcd_wakeScreen();
+            }
             joystick_was_pressed = true;
         }
 
@@ -34,6 +38,9 @@ void* ButtonControls_Thread(void* args) {
             encoder_was_pressed = false;
             nightLight_toggleLightMode();
         } else if (encoder_currently_pressed){
+            if (!encoder_was_pressed) {
+                lcd_wakeScreen();
+            }
             encoder_was_pressed = true;
         }
     }

@@ -1,7 +1,6 @@
 #include "shake_detection.h"
 #include "sendMail.h"
 #include "hal/accelerometer.h"
-#include "hal/timeout.h"
 #include "utils.h"
 #include <stdbool.h>
 #include <stdlib.h>

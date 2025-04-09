@@ -34,12 +34,12 @@ int main() {
     Gpio_initialize();
 
     // Main module initialization
+    lcd_init();
     CameraControls_init();
     ButtonControls_init();
 
     // capture_init();
     shakeDetect_init();
-    // lcd_init();
     UDPCommands_init(&stop);
 
     while(!stop);
@@ -49,11 +49,11 @@ int main() {
 
     // Main module cleanup
     UDPCommands_cleanup();
-    // lcd_cleanup();
     shakeDetect_cleanup();
     // capture_cleanup();
     ButtonControls_cleanup();
     CameraControls_cleanup();
+    lcd_cleanup();
 
     // GPIO subscribers cleanup after
     Gpio_cleanup();

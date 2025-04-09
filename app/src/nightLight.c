@@ -42,6 +42,7 @@ static void* nightLight_loop(void* arg) {
 
         long long time_now = getTimeInMs();
         if (motionDetected) {
+            printf("Motion detected\n");
             motionDetected = false;
 
             if (time_now - lastMotionEvent > DEBOUNCE_TIME_MS) {
@@ -49,6 +50,7 @@ static void* nightLight_loop(void* arg) {
 
                 // Turn on nightlight
                 if (lightSensor_getReading() < LIT_ROOM) {
+                    printf("Night light turning on\n");
                     R5_setLEDs(on_arr);
                     lightOffTime = time_now + LIGHT_ON_LENGTH;
                 }
@@ -67,6 +69,7 @@ static void* nightLight_loop(void* arg) {
 void nightLight_processEvent(bool isRising) {
     assert(is_initialized);
     if (enableLight && isRising) {
+        printf("Motion detected\n");
         motionDetected = true;
     }
 }
