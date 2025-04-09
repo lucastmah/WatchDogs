@@ -7,14 +7,14 @@
 #include "hal/i2c.h"
 #include "hal/panTilt.h"
 #include "hal/R5.h"
-// #include "lcd.h"
+#include "lcd.h"
 // #include "sendMail.h"
 #include "camera_controls.h"
 #include "button_controls.h"
 #include "udp_commands.h"
 // #include "video_capture.h"
 #include "nightLight.h"
-// #include "shake_detection.h"
+#include "shake_detection.h"
 
 bool stop = false;
 
@@ -38,7 +38,7 @@ int main() {
     ButtonControls_init();
 
     // capture_init();
-    // shake_init();
+    shakeDetect_init();
     // lcd_init();
     UDPCommands_init(&stop);
 
@@ -50,7 +50,7 @@ int main() {
     // Main module cleanup
     UDPCommands_cleanup();
     // lcd_cleanup();
-    // shake_cleanup();
+    shakeDetect_cleanup();
     // capture_cleanup();
     ButtonControls_cleanup();
     CameraControls_cleanup();

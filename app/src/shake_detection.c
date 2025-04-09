@@ -1,4 +1,4 @@
-#include "shake.h"
+#include "shake_detection.h"
 #include "sendMail.h"
 #include "hal/accelerometer.h"
 #include "hal/timeout.h"
@@ -9,34 +9,42 @@
 #include <assert.h>
 #include <stdio.h>
 #include <math.h>
+#include <string.h>
 
-#define AGGRESSIVE_SHAKE 14000
+#define AGGRESSIVE_SHAKE 12000
 // send no more than 1 per hour
 #define EMAIL_LOCKOUT_TIME 3600000
+#define MAX_EMAIL_LENGTH 100
+#define SHAKE_DEBOUNCE_MS 150
 
-static _Atomic bool isInitialized = false;
+static bool isInitialized = false;
 static pthread_t thread_id;
-static _Atomic bool lockoutAttackEvent = false;
 
 static struct accelerometer_values last_values;
-static long long last_time_email_sent;
+static long long last_time_email_sent, last_shake_event;
+
+char email[MAX_EMAIL_LENGTH+1] = {0};
 
 static void checkForEmailSend(int curr, int last) {
-    if (!lockoutAttackEvent) {
-        long long current_time = getTimeInMs();
-        if (abs(curr - last) > AGGRESSIVE_SHAKE) {
-            if (current_time - last_time_email_sent > EMAIL_LOCKOUT_TIME) {
-                last_time_email_sent = current_time;
-                // sendMail_send("lucastmah@gmail.com");
+    long long current_time = getTimeInMs();
+    if (current_time < last_shake_event + SHAKE_DEBOUNCE_MS) {
+        return;
+    }
+    if (abs(curr - last) > AGGRESSIVE_SHAKE) {
+        last_shake_event = current_time;
+        if (current_time - last_time_email_sent > EMAIL_LOCKOUT_TIME) {
+            last_time_email_sent = current_time;
+            if (email[0]) {
+                sendMail_send(email);
+            } else {
+                printf("No email defined\n");
             }
-            printf("Camera is being attacked.\n");
-            lockoutAttackEvent = true;
-            timeout_start_timer(&lockoutAttackEvent);
         }
+        printf("Camera is being attacked.\n");
     }
 }
 
-static void* shake_loop() {
+static void* shakeDetect_loop() {
     while (isInitialized) {
         struct accelerometer_values values;
         accelerometer_getValues(&values);
@@ -46,11 +54,17 @@ static void* shake_loop() {
         last_values.y = values.y;
         checkForEmailSend(values.z, last_values.z);
         last_values.z = values.z;
+        sleepForMs(5);
     }
     return NULL;
 }
 
-void shake_init(void) {
+void shakeDetect_setEmail(char input[]) {
+    strncpy(email, input, MAX_EMAIL_LENGTH);
+    email[MAX_EMAIL_LENGTH] = 0;
+}
+
+void shakeDetect_init(void) {
     assert(!isInitialized);
     isInitialized = true;
     // flush out accelerometer values for accurate reading
@@ -58,17 +72,17 @@ void shake_init(void) {
         accelerometer_getValues(&last_values);
     }
     last_time_email_sent = getTimeInMs() - EMAIL_LOCKOUT_TIME;
-    if (pthread_create(&thread_id, NULL, shake_loop, NULL) != 0) {
-        perror("failed to create shake thread");
+    if (pthread_create(&thread_id, NULL, shakeDetect_loop, NULL) != 0) {
+        perror("failed to create shakeDetect thread");
         exit(EXIT_FAILURE);
     }
 }
 
-void shake_cleanup(void) {
+void shakeDetect_cleanup(void) {
     assert(isInitialized);
     isInitialized = false;
     if (pthread_join(thread_id, NULL) != 0) {
-        perror("failed to join shake thread");
+        perror("failed to join shakeDetect thread");
         exit(EXIT_FAILURE);
     }
 }
