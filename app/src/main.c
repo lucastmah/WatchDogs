@@ -8,11 +8,11 @@
 #include "hal/panTilt.h"
 #include "hal/R5.h"
 #include "lcd.h"
-// #include "sendMail.h"
+#include "sendMail.h"
 #include "camera_controls.h"
 #include "button_controls.h"
 #include "udp_commands.h"
-// #include "video_capture.h"
+#include "video_capture.h"
 #include "nightLight.h"
 #include "shake_detection.h"
 #include "audio_proc.h"
@@ -39,7 +39,7 @@ int main() {
     CameraControls_init();
     ButtonControls_init();
 
-    // capture_init();
+    capture_init();
     AudioProc_init();
     shakeDetect_init();
     UDPCommands_init(&stop);
@@ -53,7 +53,7 @@ int main() {
     UDPCommands_cleanup();
     shakeDetect_cleanup();
     AudioProc_cleanup();
-    // capture_cleanup();
+    capture_cleanup();
     ButtonControls_cleanup();
     CameraControls_cleanup();
     lcd_cleanup();

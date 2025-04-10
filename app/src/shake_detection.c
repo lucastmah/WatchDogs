@@ -61,6 +61,7 @@ static void* shakeDetect_loop() {
 
 void shakeDetect_setEmail(char input[]) {
     strncpy(email, input, MAX_EMAIL_LENGTH);
+    last_time_email_sent = 0;
     email[MAX_EMAIL_LENGTH] = 0;
 }
 

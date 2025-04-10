@@ -13,7 +13,7 @@ static pthread_t thread;
 static void* audioProcess(){
     assert(init);
     while(init){
-        system("ffmpeg -hide_banner -loglevel error -ar 44100 -f alsa -i default:CARD=C920 -t 10 -acodec mp3 -f mp3 udp://192.168.7.2:12343");
+        system("ffmpeg -hide_banner -loglevel error -ar 44100 -f alsa -i default:CARD=U0x46d0x825 -t 10 -acodec mp3 -f mp3 udp://192.168.7.2:12343");
     }
 }
 

@@ -98,7 +98,8 @@ static void reply_command(int command, char* param, int socketDescriptor, struct
             break;
         case 8:
             shakeDetect_setEmail(param);
-            snprintf(messageTx, MAX_LEN, "email set");
+            snprintf(messageTx, MAX_LEN, "email set to %s\n", param);
+            break;
         case 9:
         case 10:
             snprintf(messageTx, MAX_LEN, help, int_param);

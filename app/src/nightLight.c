@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#define LIT_ROOM 25
+#define LIT_ROOM 100
 #define LIGHT_ON_LENGTH 5000  // ms
 #define DEBOUNCE_TIME_MS 150  // ms
 
@@ -38,28 +38,26 @@ static void* nightLight_loop(void* arg) {
 
     while (!stop) {
         sleepForMs(100);
-        if (!enableLight) continue;
-
         long long time_now = getTimeInMs();
-        if (motionDetected) {
-            printf("Motion detected\n");
-            motionDetected = false;
-
-            if (time_now - lastMotionEvent > DEBOUNCE_TIME_MS) {
-                lastMotionEvent = time_now;
-
-                // Turn on nightlight
-                if (lightSensor_getReading() < LIT_ROOM) {
-                    printf("Night light turning on\n");
-                    R5_setLEDs(on_arr);
-                    lightOffTime = time_now + LIGHT_ON_LENGTH;
-                }
-            }
-        }
         // Handle when light needs to turn off from previous event
         if (lightOffTime != -1 && time_now >= lightOffTime) {
             R5_setLEDs(off_arr);
             lightOffTime = -1;
+        }
+        if (!enableLight) continue;
+
+        if (motionDetected) {
+            // Turn on nightlight
+            if (lightSensor_getReading() < LIT_ROOM) {
+                printf("Night light turning on\n");
+                R5_setLEDs(on_arr);
+                lightOffTime = -1;
+            }
+        } else {
+            if (lightOffTime == -1) {
+                lightOffTime = time_now + LIGHT_ON_LENGTH;
+                printf("Light turning off at %d\n", lightOffTime);
+            }
         }
     }
 
@@ -68,9 +66,14 @@ static void* nightLight_loop(void* arg) {
 
 void nightLight_processEvent(bool isRising) {
     assert(is_initialized);
-    if (enableLight && isRising) {
+    if (isRising) {
         printf("Motion detected\n");
         motionDetected = true;
+        // R5_setLEDs(on_arr);
+    }
+    else {
+        motionDetected = false;
+        // R5_setLEDs(off_arr);
     }
 }
 

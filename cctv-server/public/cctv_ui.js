@@ -17,7 +17,7 @@ var zoomSettings = {
 	y: 30
 }
 
-var current_email = "lucastmah@gmail.com";
+var current_email = "";
 
 var currentCam = 0;
 var cams = [
